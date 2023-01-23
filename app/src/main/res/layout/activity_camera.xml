@@ -4,50 +4,60 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TimeButtonActivity">
+    tools:context=".CameraActivity">
 
     <TextView
-        android:id="@+id/txtTimeButton"
+        android:id="@+id/textCamera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Keep pressing button until the progress bar is full"
+        android:text="Press start and point camera to different spots to generate data."
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnTimeButton"
+        android:id="@+id/btnCameraStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
+        android:text="Start"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
 
     <ProgressBar
-        android:id="@+id/progressBarTimeButton"
+        android:id="@+id/progressBarCamera"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="200dp"
         android:layout_height="31dp"
         android:layout_marginTop="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnTimeButton"
+        app:layout_constraintBottom_toTopOf="@+id/btnCameraStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtTimeButton" />
+        app:layout_constraintTop_toBottomOf="@+id/textCamera" />
 
     <TextView
-        android:id="@+id/txtTimeButtonBarPercent"
+        android:id="@+id/txtCameraBarPercent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="0%"
-        app:layout_constraintBottom_toBottomOf="@+id/progressBarTimeButton"
-        app:layout_constraintStart_toEndOf="@+id/progressBarTimeButton"
-        app:layout_constraintTop_toTopOf="@+id/progressBarTimeButton" />
+        app:layout_constraintBottom_toBottomOf="@+id/progressBarCamera"
+        app:layout_constraintStart_toEndOf="@+id/progressBarCamera"
+        app:layout_constraintTop_toTopOf="@+id/progressBarCamera" />
 
+    <TextureView
+        android:id="@+id/textureViewCamera"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnCameraStart" />
 </androidx.constraintlayout.widget.ConstraintLayout>

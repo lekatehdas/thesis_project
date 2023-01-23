@@ -4,50 +4,53 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TimeButtonActivity">
+    tools:context=".TimeTypingActivity">
 
     <TextView
-        android:id="@+id/txtTimeButton"
+        android:id="@+id/txtTimeTyping"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Keep pressing button until the progress bar is full"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btnTimeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Keep typing until the progress bar is full"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
-        android:id="@+id/progressBarTimeButton"
+        android:id="@+id/progressBarTimeTyping"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="200dp"
         android:layout_height="31dp"
         android:layout_marginTop="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnTimeButton"
+        app:layout_constraintBottom_toTopOf="@+id/editTxtTimeTyping"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtTimeButton" />
+        app:layout_constraintTop_toBottomOf="@+id/txtTimeTyping" />
 
     <TextView
-        android:id="@+id/txtTimeButtonBarPercent"
+        android:id="@+id/txtTimeTypingBarPercent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="0%"
-        app:layout_constraintBottom_toBottomOf="@+id/progressBarTimeButton"
-        app:layout_constraintStart_toEndOf="@+id/progressBarTimeButton"
-        app:layout_constraintTop_toTopOf="@+id/progressBarTimeButton" />
+        app:layout_constraintBottom_toBottomOf="@+id/progressBarTimeTyping"
+        app:layout_constraintStart_toEndOf="@+id/progressBarTimeTyping"
+        app:layout_constraintTop_toTopOf="@+id/progressBarTimeTyping" />
+
+    <EditText
+        android:id="@+id/editTxtTimeTyping"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Type here"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,21 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TimeButtonActivity">
+    tools:context=".WifiNoiseActivity">
 
     <TextView
-        android:id="@+id/txtTimeButton"
+        android:id="@+id/txtWifiNoise"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Keep pressing button until the progress bar is full"
+        android:text="Press button to start recording the WIFI noise."
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnTimeButton"
+        android:id="@+id/btnWifiNoise"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Button"
@@ -29,25 +29,25 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
-        android:id="@+id/progressBarTimeButton"
+        android:id="@+id/progressBarWifiNoise"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="200dp"
         android:layout_height="31dp"
         android:layout_marginTop="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnTimeButton"
+        app:layout_constraintBottom_toTopOf="@+id/btnWifiNoise"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtTimeButton" />
+        app:layout_constraintTop_toBottomOf="@+id/txtWifiNoise" />
 
     <TextView
-        android:id="@+id/txtTimeButtonBarPercent"
+        android:id="@+id/txtWifiNoiseBarPercent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="0%"
-        app:layout_constraintBottom_toBottomOf="@+id/progressBarTimeButton"
-        app:layout_constraintStart_toEndOf="@+id/progressBarTimeButton"
-        app:layout_constraintTop_toTopOf="@+id/progressBarTimeButton" />
+        app:layout_constraintBottom_toBottomOf="@+id/progressBarWifiNoise"
+        app:layout_constraintStart_toEndOf="@+id/progressBarWifiNoise"
+        app:layout_constraintTop_toTopOf="@+id/progressBarWifiNoise"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
