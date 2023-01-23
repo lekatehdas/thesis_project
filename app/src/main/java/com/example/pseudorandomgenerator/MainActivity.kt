@@ -10,8 +10,6 @@ class MainActivity : AppCompatActivity() {
     Methods to be used:
         -Continuous camera feedback.
 
-        - WIFI/Bluetooth noises. Needs rethinking.
-
         -Geolocation, random spots from google maps and then select spot.
             -Need to normalise the data somehow.
 

@@ -8,12 +8,11 @@ class Hasher {
             var data = ""
             val bytes = MessageDigest.getInstance("SHA-512").digest(input.toByteArray())
 
-            return String(bytes)
+            for (value in bytes) {
+                data += value.toString()
+            }
 
-//            for (value in bytes) {
-//                data += value.toString()
-//            }
-//            return data
+            return data
         }
     }
 }

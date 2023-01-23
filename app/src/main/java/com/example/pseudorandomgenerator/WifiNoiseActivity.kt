@@ -59,8 +59,7 @@ class WifiNoiseActivity : AppCompatActivity() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             PermissionHelper.checkAndRequestPermissions(this)
-        } else {
-        }
+        } else { }
 
         val stringBuilder = StringBuilder()
         wifiManager.startScan()
@@ -69,6 +68,7 @@ class WifiNoiseActivity : AppCompatActivity() {
 
         for (result in scanResults) {
             stringBuilder.append(formatResults(result))
+
             progressBarWifiNoise.progress = stringBuilder.toString().length
 
             val percentage = (progressBarWifiNoise.progress.toFloat() / progressBarWifiNoise.max.toFloat()) * 100
@@ -85,7 +85,7 @@ class WifiNoiseActivity : AppCompatActivity() {
 
             builder.create().show()
         } else {
-            txtWifiNoise.text = stringBuilder.toString()
+            TODO("Trim the results and save to database")
         }
     }
 
