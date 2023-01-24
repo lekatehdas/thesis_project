@@ -8,9 +8,6 @@ import android.widget.Button
 class MainActivity : AppCompatActivity() {
     /*
     Methods to be used:
-        -Geolocation, random spots from google maps and then select spot.
-            -Need to normalise the data somehow.
-
         -Cesar cypher
             -Text to speech, record also the audio.
             -From the audio, create a mapping function so that it generates a unix char string
@@ -25,6 +22,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val permissionHelper = PermissionHelper(this)
+        permissionHelper.checkAndAskPermissions()
 
         uiElements = UiElements(this@MainActivity)
         uiElements.initViews()

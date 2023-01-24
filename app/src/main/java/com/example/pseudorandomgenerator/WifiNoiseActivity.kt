@@ -41,7 +41,8 @@ class WifiNoiseActivity : AppCompatActivity() {
 
         val permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if (permission != PackageManager.PERMISSION_GRANTED) {
-            PermissionHelper.checkAndRequestPermissions(this)
+            val permissionHelper = PermissionHelper(this@WifiNoiseActivity)
+            permissionHelper.checkAndAskPermissions()
         }
 
         wifiManager.startScan()

@@ -33,6 +33,8 @@ class CameraActivity : AppCompatActivity() {
 
         binding.progressBarCamera.max = EnvVariables.DESIRED_LENGTH
 
+
+
         useCamera()
 
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -43,12 +45,10 @@ class CameraActivity : AppCompatActivity() {
         binding.btnCameraStart.setOnClickListener {
             if (!isUsed) {
                 startCamera()
-
                 binding.btnCameraStart.text = "STOP"
 
             } else {
                 stopCamera()
-
                 binding.btnCameraStart.text = "START"
 
                 if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
