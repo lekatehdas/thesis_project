@@ -78,6 +78,8 @@ class MovementActivity : AppCompatActivity(),  SensorEventListener{
         if (generatedData.length > EnvVariables.DESIRED_LENGTH) {
             unregisterListeners()
             btnStart.text = "START"
+            generatedData = ""
+            TODO("Do stuff with generated data")
         }
 
         if (event == null) {

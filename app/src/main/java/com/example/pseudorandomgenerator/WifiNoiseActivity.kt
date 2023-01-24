@@ -45,7 +45,6 @@ class WifiNoiseActivity : AppCompatActivity() {
         txtWifiNoise = findViewById(R.id.txtWifiNoise)
     }
 
-    @SuppressLint("SetTextI18n")
     private fun wifiNoiseData() {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (!wifiManager.isWifiEnabled) {
@@ -53,29 +52,23 @@ class WifiNoiseActivity : AppCompatActivity() {
             return
         }
 
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            PermissionHelper.checkAndRequestPermissions(this)
-        } else { }
-
-        val stringBuilder = StringBuilder()
         wifiManager.startScan()
 
-        val scanResults: List<ScanResult> = wifiManager.scanResults
-
-        for (result in scanResults) {
-            stringBuilder.append(formatResults(result))
-
-            progressBarWifiNoise.progress = stringBuilder.toString().length
-
-            val percentage = (progressBarWifiNoise.progress.toFloat() / progressBarWifiNoise.max.toFloat()) * 100
-            txtWifiNoiseBarPercent.text = "${percentage.toInt()}%"
+        val permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            PermissionHelper.checkAndRequestPermissions(this)
         }
 
-        if (stringBuilder.toString().length < EnvVariables.DESIRED_LENGTH) {
+        val stringBuilder = StringBuilder()
+
+        for (result in wifiManager.scanResults) {
+            val formattedResult = formatResults(result)
+            stringBuilder.append(formattedResult)
+
+            updateProgressInUi(stringBuilder)
+        }
+
+        if (!enoughData(stringBuilder)) {
             val builder = AlertDialog.Builder(this)
             builder.setMessage("""
                 Not enough data to generate key.
@@ -85,8 +78,20 @@ class WifiNoiseActivity : AppCompatActivity() {
 
             builder.create().show()
         } else {
-            TODO("Trim the results and save to database")
+//            TODO("Trim the results and save to database")
         }
+    }
+
+    private fun enoughData(stringBuilder: StringBuilder) =
+        stringBuilder.toString().length >= EnvVariables.DESIRED_LENGTH
+
+    @SuppressLint("SetTextI18n")
+    private fun updateProgressInUi(stringBuilder: StringBuilder) {
+        progressBarWifiNoise.progress = stringBuilder.toString().length
+
+        val percentage =
+            (progressBarWifiNoise.progress.toFloat() / progressBarWifiNoise.max.toFloat()) * 100
+        txtWifiNoiseBarPercent.text = "${percentage.toInt()}%"
     }
 
     private fun formatResults(result: ScanResult): Any {

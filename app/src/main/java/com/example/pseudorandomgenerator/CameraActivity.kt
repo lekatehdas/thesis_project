@@ -43,20 +43,28 @@ class CameraActivity : AppCompatActivity() {
         binding.btnCameraStart.setOnClickListener {
             if (!isUsed) {
                 startCamera()
+
                 binding.btnCameraStart.text = "STOP"
+
             } else {
                 stopCamera()
-                binding.btnCameraStart.text = "START"
-                if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
-                    println(generatedData.substring(0, EnvVariables.DESIRED_LENGTH))
 
-                    generatedData = ""
-                    binding.progressBarCamera.progress = 0
-                    binding.txtCameraBarPercent.text = "0%"
+                binding.btnCameraStart.text = "START"
+
+                if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
+//                    TODO("Deal with generated data.")
+                    resetDataGatheringProcess()
                 }
             }
+
             isUsed = !isUsed
         }
+    }
+
+    private fun resetDataGatheringProcess() {
+        generatedData = ""
+        binding.progressBarCamera.progress = 0
+        binding.txtCameraBarPercent.text = "0%"
     }
 
     private fun startCamera() {

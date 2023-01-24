@@ -1,5 +1,5 @@
 package com.example.pseudorandomgenerator
 
 object EnvVariables {
-    val DESIRED_LENGTH = 246
+    val DESIRED_LENGTH = 256
 }
