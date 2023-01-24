@@ -65,6 +65,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun startCamera() {
+        // Almost all is copy pasted from the android development example.
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
@@ -105,6 +106,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun stopCamera() {
+        // copy pasted from android development example.
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
@@ -118,15 +120,9 @@ class CameraActivity : AppCompatActivity() {
     }
 
     inner class ImageAnalyzer : ImageAnalysis.Analyzer {
-        @SuppressLint("SetTextI18n")
         @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
         override fun analyze(image: ImageProxy) {
-
-            val buffer = image.planes[0].buffer
-            val data = buffer.toByteArray()
-            val pixels = data.map { it.toInt() and 0xFF }
-
-            val average = pixels.average().toString()
+            val average = getAverageValueOfTheFrame(image)
             val fractional: Long = average.split(".")[1].toLong()
 
             val hexString = fractional.toString(16)
@@ -136,14 +132,27 @@ class CameraActivity : AppCompatActivity() {
                 generatedData = char + generatedData
             }
 
-            binding.progressBarCamera.progress = generatedData.length
-
             runOnUiThread {
-                val percentage = (binding.progressBarCamera.progress.toFloat() / binding.progressBarCamera.max.toFloat()) * 100
-                binding.txtCameraBarPercent.text = "${percentage.toInt()}%"
+                updateProgressInUi()
             }
 
             image.close()
+        }
+
+        private fun getAverageValueOfTheFrame(image: ImageProxy): String {
+            val buffer = image.planes[0].buffer
+            val data = buffer.toByteArray()
+            val pixels = data.map { it.toInt() and 0xFF }
+
+            return pixels.average().toString()
+        }
+
+        @SuppressLint("SetTextI18n")
+        private fun updateProgressInUi() {
+            binding.progressBarCamera.progress = generatedData.length
+            val percentage =
+                (binding.progressBarCamera.progress.toFloat() / binding.progressBarCamera.max.toFloat()) * 100
+            binding.txtCameraBarPercent.text = "${percentage.toInt()}%"
         }
 
         private fun hexToAscii(hex: String): String {
@@ -155,20 +164,18 @@ class CameraActivity : AppCompatActivity() {
             val sb = StringBuilder()
 
             while (decimal > BigInteger.ZERO) {
-                // get the last 8 digits of decimal
-                val last8Digits = decimal.and(BigInteger.valueOf(0xff))
+                val lastEightDigits = decimal.and(BigInteger.valueOf(0xff))
 
-                // convert the last 8 digits to ascii
-                val ascii = last8Digits.toInt()
+                val ascii = lastEightDigits.toInt()
                 if (ascii in 32..126) sb.append(ascii.toChar())
 
-                // divide the decimal by 2^8
                 decimal = decimal.shiftRight(8)
             }
             return sb.reverse().toString()
         }
 
         private fun ByteBuffer.toByteArray(): ByteArray {
+            // Copy pasted from the android development example.
             rewind()    // Rewind the buffer to zero
             val data = ByteArray(remaining())
             get(data)   // Copy the buffer into a byte array

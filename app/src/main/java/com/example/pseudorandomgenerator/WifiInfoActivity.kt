@@ -28,11 +28,11 @@ class WifiInfoActivity : AppCompatActivity() {
 
     private fun initListeners() {
         binding.btnWifiInfo.setOnClickListener {
-            wifiNoiseData()
+            wifiInfoData()
         }
     }
 
-    private fun wifiNoiseData() {
+    private fun wifiInfoData() {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (!wifiManager.isWifiEnabled) {
             Toast.makeText(this, "WiFi is not enabled", Toast.LENGTH_SHORT).show()
@@ -77,8 +77,7 @@ class WifiInfoActivity : AppCompatActivity() {
     private fun updateProgressInUi(stringBuilder: StringBuilder) {
         binding.progressBarWifiInfo.progress = stringBuilder.toString().length
 
-        val percentage =
-            (binding.progressBarWifiInfo.progress.toFloat() / binding.progressBarWifiInfo.max.toFloat()) * 100
+        val percentage = (binding.progressBarWifiInfo.progress.toFloat() / binding.progressBarWifiInfo.max.toFloat()) * 100
         binding.txtWifiInfoBarPercent.text = "${percentage.toInt()}%"
     }
 
