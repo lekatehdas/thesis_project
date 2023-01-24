@@ -33,12 +33,9 @@ class CameraActivity : AppCompatActivity() {
 
         binding.progressBarCamera.max = EnvVariables.DESIRED_LENGTH
 
-
-
         useCamera()
 
         cameraExecutor = Executors.newSingleThreadExecutor()
-
     }
 
     private fun useCamera() {
