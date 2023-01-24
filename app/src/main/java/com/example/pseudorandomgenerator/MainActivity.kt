@@ -8,8 +8,6 @@ import android.widget.Button
 class MainActivity : AppCompatActivity() {
     /*
     Methods to be used:
-        -Continuous camera feedback.
-
         -Geolocation, random spots from google maps and then select spot.
             -Need to normalise the data somehow.
 

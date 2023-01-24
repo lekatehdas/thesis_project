@@ -47,9 +47,12 @@ class CameraActivity : AppCompatActivity() {
             } else {
                 stopCamera()
                 binding.btnCameraStart.text = "START"
-                if (generatedData.length > EnvVariables.DESIRED_LENGTH) {
+                if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
                     println(generatedData.substring(0, EnvVariables.DESIRED_LENGTH))
+
                     generatedData = ""
+                    binding.progressBarCamera.progress = 0
+                    binding.txtCameraBarPercent.text = "0%"
                 }
             }
             isUsed = !isUsed
@@ -124,7 +127,9 @@ class CameraActivity : AppCompatActivity() {
             val hexString = fractional.toString(16)
             val char = hexToAscii(hexString)
 
-            generatedData = char + generatedData
+            if (char.isNotEmpty()) {
+                generatedData = char + generatedData
+            }
 
             binding.progressBarCamera.progress = generatedData.length
 
