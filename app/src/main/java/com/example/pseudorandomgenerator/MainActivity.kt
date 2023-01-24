@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnWifi.setOnClickListener {
-            val intent = Intent(this, WifiNoiseActivity::class.java)
+            val intent = Intent(this, WifiInfoActivity::class.java)
             startActivity(intent)
         }
 

@@ -13,7 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import com.example.pseudorandomgenerator.databinding.ActivityWifiBinding
 
-class WifiNoiseActivity : AppCompatActivity() {
+class WifiInfoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWifiBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +41,7 @@ class WifiNoiseActivity : AppCompatActivity() {
 
         val permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if (permission != PackageManager.PERMISSION_GRANTED) {
-            val permissionHelper = PermissionHelper(this@WifiNoiseActivity)
+            val permissionHelper = PermissionHelper(this@WifiInfoActivity)
             permissionHelper.checkAndAskPermissions()
         }
 

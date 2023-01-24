@@ -32,7 +32,7 @@
             android:name=".TimeTypingActivity"
             android:exported="false" />
         <activity
-            android:name=".WifiNoiseActivity"
+            android:name=".WifiInfoActivity"
             android:exported="false" />
         <activity
             android:name=".TimeButtonActivity"
