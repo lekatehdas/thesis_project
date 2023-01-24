@@ -7,18 +7,18 @@
     tools:context=".WifiNoiseActivity">
 
     <TextView
-        android:id="@+id/txtWifiNoise"
+        android:id="@+id/txtWifiInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Press button to start recording the WIFI noise."
+        android:text="Press button to start recording the WIFI info."
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnWifiNoise"
+        android:id="@+id/btnWifiInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Button"
@@ -29,25 +29,25 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
-        android:id="@+id/progressBarWifiNoise"
+        android:id="@+id/progressBarWifiInfo"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="200dp"
         android:layout_height="31dp"
         android:layout_marginTop="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnWifiNoise"
+        app:layout_constraintBottom_toTopOf="@+id/btnWifiInfo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtWifiNoise" />
+        app:layout_constraintTop_toBottomOf="@+id/txtWifiInfo" />
 
     <TextView
-        android:id="@+id/txtWifiNoiseBarPercent"
+        android:id="@+id/txtWifiInfoBarPercent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="0%"
-        app:layout_constraintBottom_toBottomOf="@+id/progressBarWifiNoise"
-        app:layout_constraintStart_toEndOf="@+id/progressBarWifiNoise"
-        app:layout_constraintTop_toTopOf="@+id/progressBarWifiNoise"/>
+        app:layout_constraintBottom_toBottomOf="@+id/progressBarWifiInfo"
+        app:layout_constraintStart_toEndOf="@+id/progressBarWifiInfo"
+        app:layout_constraintTop_toTopOf="@+id/progressBarWifiInfo"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

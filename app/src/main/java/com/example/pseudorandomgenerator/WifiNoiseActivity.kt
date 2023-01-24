@@ -8,41 +8,28 @@ import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import com.example.pseudorandomgenerator.databinding.ActivityWifiBinding
 
 class WifiNoiseActivity : AppCompatActivity() {
-    private lateinit var btnWifiNoise: Button;
-    private lateinit var progressBarWifiNoise: ProgressBar;
-    private lateinit var txtWifiNoiseBarPercent: TextView;
-    private lateinit var txtWifiNoise: TextView;
+    private lateinit var binding: ActivityWifiBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wifi)
+        binding = ActivityWifiBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        initViews()
-        progressBarWifiNoise.max = EnvVariables.DESIRED_LENGTH
+        binding.progressBarWifiInfo.max = EnvVariables.DESIRED_LENGTH
 
         initListeners()
-
     }
 
     private fun initListeners() {
-        btnWifiNoise.setOnClickListener {
+        binding.btnWifiInfo.setOnClickListener {
             wifiNoiseData()
         }
-    }
-
-    private fun initViews() {
-        btnWifiNoise = findViewById(R.id.btnWifiNoise)
-        progressBarWifiNoise = findViewById(R.id.progressBarWifiNoise)
-        txtWifiNoiseBarPercent = findViewById(R.id.txtWifiNoiseBarPercent)
-        txtWifiNoise = findViewById(R.id.txtWifiNoise)
     }
 
     private fun wifiNoiseData() {
@@ -52,23 +39,23 @@ class WifiNoiseActivity : AppCompatActivity() {
             return
         }
 
-        wifiManager.startScan()
-
         val permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if (permission != PackageManager.PERMISSION_GRANTED) {
             PermissionHelper.checkAndRequestPermissions(this)
         }
 
-        val stringBuilder = StringBuilder()
+        wifiManager.startScan()
+
+        val generatedData = StringBuilder()
 
         for (result in wifiManager.scanResults) {
             val formattedResult = formatResults(result)
-            stringBuilder.append(formattedResult)
+            generatedData.append(formattedResult)
 
-            updateProgressInUi(stringBuilder)
+            updateProgressInUi(generatedData)
         }
 
-        if (!enoughData(stringBuilder)) {
+        if (!enoughData(generatedData)) {
             val builder = AlertDialog.Builder(this)
             builder.setMessage("""
                 Not enough data to generate key.
@@ -87,11 +74,11 @@ class WifiNoiseActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateProgressInUi(stringBuilder: StringBuilder) {
-        progressBarWifiNoise.progress = stringBuilder.toString().length
+        binding.progressBarWifiInfo.progress = stringBuilder.toString().length
 
         val percentage =
-            (progressBarWifiNoise.progress.toFloat() / progressBarWifiNoise.max.toFloat()) * 100
-        txtWifiNoiseBarPercent.text = "${percentage.toInt()}%"
+            (binding.progressBarWifiInfo.progress.toFloat() / binding.progressBarWifiInfo.max.toFloat()) * 100
+        binding.txtWifiInfoBarPercent.text = "${percentage.toInt()}%"
     }
 
     private fun formatResults(result: ScanResult): Any {
