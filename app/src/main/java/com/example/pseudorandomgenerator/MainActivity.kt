@@ -21,8 +21,6 @@ class MainActivity : AppCompatActivity() {
         - Generally needed.
             - To save data to the DB together with timestamp and method name.
             Pref automatically when desired amount of data has been generated.
-
-            -
      */
     private lateinit var uiElements: UiElements
 
