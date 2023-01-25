@@ -45,6 +45,7 @@ class TextToSpeechActivity : AppCompatActivity() {
     private fun resetUiElements() {
         binding.progressBarSpeech.progress = 0
         binding.txtProgressBarSpeechPercent.text = "0%"
+        generatedData = ""
     }
 
     @SuppressLint("SetTextI18n")
