@@ -32,11 +32,11 @@ android {
     }
     buildFeatures {
         viewBinding true
+        prefab true
     }
 }
 
 dependencies {
-
     implementation 'androidx.core:core-ktx:+'
     def camerax_version = "1.3.0-alpha02"
     implementation "androidx.camera:camera-core:${camerax_version}"
