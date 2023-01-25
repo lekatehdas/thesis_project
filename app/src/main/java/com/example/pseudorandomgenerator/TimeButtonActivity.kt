@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.example.utilities.EnvVariables
+import com.example.utilities.StringTruncator
+import com.google.firebase.database.FirebaseDatabase
 
 class TimeButtonActivity: AppCompatActivity() {
     private lateinit var btnTime: Button;
@@ -19,26 +22,47 @@ class TimeButtonActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_time)
 
-
         initViews()
+        progressBar.max = EnvVariables.DESIRED_LENGTH
+
         initListeners()
     }
 
-    @SuppressLint("SetTextI18n")
     private fun initListeners() {
         btnTime.setOnClickListener {
             if (generatedData.length > EnvVariables.DESIRED_LENGTH) {
-                TODO("When desired length achieved, trim the end and save the data to the db. Notify the user That ")
+                saveData()
+                resetUiElements()
+                resetData()
             }
 
             generatedData += (System.currentTimeMillis() % 1000).toString()
 
-            progressBar.max = EnvVariables.DESIRED_LENGTH
-            progressBar.progress = generatedData.length
-
-            val percentage = (progressBar.progress.toFloat() / progressBar.max.toFloat()) * 100
-            txtBarPercent.text = "${percentage.toInt()}%"
+            updateUiElements()
         }
+    }
+
+    private fun resetData() {
+        generatedData = ""
+    }
+
+    private fun resetUiElements() {
+        progressBar.progress = 0
+        txtBarPercent.text = "0%"
+    }
+
+    private fun saveData() {
+        val finalString = StringTruncator.truncate(generatedData, EnvVariables.DESIRED_LENGTH)
+        val dbRef = FirebaseDatabase.getInstance().getReference("time_button")
+        dbRef.push().setValue(finalString)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateUiElements() {
+        progressBar.progress = generatedData.length
+
+        val percentage = (progressBar.progress.toFloat() / progressBar.max.toFloat()) * 100
+        txtBarPercent.text = "${percentage.toInt()}%"
     }
 
     private fun initViews() {

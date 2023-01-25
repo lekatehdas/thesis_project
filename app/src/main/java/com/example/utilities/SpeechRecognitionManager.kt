@@ -1,4 +1,4 @@
-package com.example.pseudorandomgenerator
+package com.example.utilities
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.speech.RecognizerIntent
 import java.io.InputStream
-import java.math.BigInteger
-import java.nio.charset.Charset
 import kotlin.experimental.xor
 
 

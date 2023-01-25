@@ -12,6 +12,9 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
+import com.example.utilities.EnvVariables
+import com.example.utilities.StringTruncator
+import com.google.firebase.database.FirebaseDatabase
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
@@ -49,8 +52,9 @@ class CameraActivity : AppCompatActivity() {
                 binding.btnCameraStart.text = "START"
 
                 if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
-//                    TODO("Deal with generated data.")
-                    resetDataGatheringProcess()
+                    saveData()
+                    resetData()
+                    resetUiElements()
                 }
             }
 
@@ -58,8 +62,17 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private fun resetDataGatheringProcess() {
+    private fun saveData() {
+        val finalString = StringTruncator.truncate(generatedData, EnvVariables.DESIRED_LENGTH)
+        val dbRef = FirebaseDatabase.getInstance().getReference("camera")
+        dbRef.push().setValue(finalString)
+    }
+
+    private fun resetData() {
         generatedData = ""
+    }
+
+    private fun resetUiElements() {
         binding.progressBarCamera.progress = 0
         binding.txtCameraBarPercent.text = "0%"
     }

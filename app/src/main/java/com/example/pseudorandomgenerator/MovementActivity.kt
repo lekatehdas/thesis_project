@@ -10,6 +10,9 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.example.utilities.EnvVariables
+import com.example.utilities.StringTruncator
+import com.google.firebase.database.FirebaseDatabase
 
 class MovementActivity : AppCompatActivity(),  SensorEventListener{
     private lateinit var btnStart: Button
@@ -62,9 +65,6 @@ class MovementActivity : AppCompatActivity(),  SensorEventListener{
 
     private fun unregisterListeners() {
         sensorManager.unregisterListener(this)
-        sensorManager.unregisterListener(this)
-        sensorManager.unregisterListener(this)
-        sensorManager.unregisterListener(this)
     }
 
     private fun initViews() {
@@ -77,9 +77,9 @@ class MovementActivity : AppCompatActivity(),  SensorEventListener{
     override fun onSensorChanged(event: SensorEvent?) {
         if (generatedData.length > EnvVariables.DESIRED_LENGTH) {
             unregisterListeners()
+            saveData()
             btnStart.text = "START"
             generatedData = ""
-            TODO("Do stuff with generated data")
         }
 
         if (event == null) {
@@ -88,6 +88,12 @@ class MovementActivity : AppCompatActivity(),  SensorEventListener{
 
         generatedData += getValues(event)
         progressBar.progress = generatedData.length
+    }
+
+    private fun saveData() {
+        val finalString = StringTruncator.truncate(generatedData, EnvVariables.DESIRED_LENGTH)
+        val dbRef = FirebaseDatabase.getInstance().getReference("movement")
+        dbRef.push().setValue(finalString)
     }
 
     private fun getValues(event: SensorEvent): String {

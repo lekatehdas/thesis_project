@@ -8,6 +8,9 @@ import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.example.utilities.EnvVariables
+import com.example.utilities.StringTruncator
+import com.google.firebase.database.FirebaseDatabase
 
 class TimeTypingActivity : AppCompatActivity() {
     private lateinit var editTxtTimeTyping: EditText
@@ -16,31 +19,52 @@ class TimeTypingActivity : AppCompatActivity() {
     private var generatedData = ""
 
     private val textWatcher = object : TextWatcher {
-        @SuppressLint("SetTextI18n")
         override fun afterTextChanged(s: Editable?) {
-            if (generatedData.length > EnvVariables.DESIRED_LENGTH) {
-                TODO("When desired length achieved, trim the end and save the data to the db. Notify the user That ")
+            if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
+                saveData()
+                resetUiElements()
+                resetData()
             }
 
-            generatedData += (System.currentTimeMillis() % 1000).toString()
-
-            timeTypingProgressBar.max = EnvVariables.DESIRED_LENGTH
-            timeTypingProgressBar.progress = generatedData.length
-
-            val percentage = (timeTypingProgressBar.progress.toFloat() / timeTypingProgressBar.max.toFloat()) * 100
-            txtTimeTypingBarPercent.text = "${percentage.toInt()}%"
+            updateUiElements()
         }
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
     }
 
+    @SuppressLint("SetTextI18n")
+    private fun updateUiElements() {
+        generatedData += (System.currentTimeMillis() % 1000).toString()
+        timeTypingProgressBar.progress = generatedData.length
+
+        val percentage =
+            (timeTypingProgressBar.progress.toFloat() / timeTypingProgressBar.max.toFloat()) * 100
+        txtTimeTypingBarPercent.text = "${percentage.toInt()}%"
+    }
+
+    private fun resetData() {
+        generatedData = ""
+    }
+
+    private fun resetUiElements() {
+        timeTypingProgressBar.progress = 0
+        txtTimeTypingBarPercent.text = "0%"
+    }
+
+    private fun saveData() {
+        val finalString = StringTruncator.truncate(generatedData, EnvVariables.DESIRED_LENGTH)
+        val dbRef = FirebaseDatabase.getInstance().getReference("time_typing")
+        dbRef.push().setValue(finalString)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_time_typeing)
 
-
         initViews()
+        timeTypingProgressBar.max = EnvVariables.DESIRED_LENGTH
+
         initListeners()
     }
 

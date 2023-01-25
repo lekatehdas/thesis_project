@@ -12,9 +12,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import com.example.pseudorandomgenerator.databinding.ActivityWifiBinding
+import com.example.utilities.EnvVariables
+import com.example.utilities.PermissionHelper
+import com.example.utilities.StringTruncator
+import com.google.firebase.database.FirebaseDatabase
 
 class WifiInfoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWifiBinding
+    private var generatedData = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,11 +52,9 @@ class WifiInfoActivity : AppCompatActivity() {
 
         wifiManager.startScan()
 
-        val generatedData = StringBuilder()
-
         for (result in wifiManager.scanResults) {
             val formattedResult = formatResults(result)
-            generatedData.append(formattedResult)
+            generatedData += formattedResult
 
             updateProgressInUi(generatedData)
         }
@@ -66,16 +69,33 @@ class WifiInfoActivity : AppCompatActivity() {
 
             builder.create().show()
         } else {
-//            TODO("Trim the results and save to database")
+            saveData()
+            resetUiElements()
+            resetData()
         }
     }
 
-    private fun enoughData(stringBuilder: StringBuilder) =
-        stringBuilder.toString().length >= EnvVariables.DESIRED_LENGTH
+    private fun saveData() {
+        val finalString = StringTruncator.truncate(generatedData, EnvVariables.DESIRED_LENGTH)
+        val dbRef = FirebaseDatabase.getInstance().getReference("wifi")
+        dbRef.push().setValue(finalString)
+    }
+
+    private fun resetData() {
+        generatedData = ""
+    }
+
+    private fun resetUiElements() {
+        binding.progressBarWifiInfo.progress = 0
+        binding.txtWifiInfoBarPercent.text = "0%"
+    }
+
+    private fun enoughData(s: String) =
+        s.length >= EnvVariables.DESIRED_LENGTH
 
     @SuppressLint("SetTextI18n")
-    private fun updateProgressInUi(stringBuilder: StringBuilder) {
-        binding.progressBarWifiInfo.progress = stringBuilder.toString().length
+    private fun updateProgressInUi(s: String) {
+        binding.progressBarWifiInfo.progress = s.length
 
         val percentage = (binding.progressBarWifiInfo.progress.toFloat() / binding.progressBarWifiInfo.max.toFloat()) * 100
         binding.txtWifiInfoBarPercent.text = "${percentage.toInt()}%"

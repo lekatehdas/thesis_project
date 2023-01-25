@@ -1,4 +1,4 @@
-package com.example.pseudorandomgenerator
+package com.example.utilities
 
 import android.app.Activity
 import android.content.pm.PackageManager
