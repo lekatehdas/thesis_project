@@ -1,12 +1,10 @@
 package com.example.pseudorandomgenerator
 
-import android.annotation.SuppressLint
-import android.net.wifi.ScanResult
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import com.example.data_generator.WifiInformationGenerator
+import com.example.data_generator.WifiInformationDataGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityWifiBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
@@ -30,7 +28,7 @@ class WifiInfoActivity : AppCompatActivity() {
     }
 
     private fun wifiInfoData() {
-        val generator = WifiInformationGenerator(this)
+        val generator = WifiInformationDataGenerator(this)
 
         generatedData += generator.getWifiInformationData()
 

@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.example.utilities.PermissionHelper
 
-class WifiInformationGenerator(private val context: Context) {
+class WifiInformationDataGenerator(private val context: Context) {
     private var generatedData = ""
 
     fun getWifiInformationData(): String {
