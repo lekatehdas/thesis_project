@@ -9,15 +9,13 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.pseudorandomgenerator.databinding.ActivityNetworkBinding
+import com.example.pseudorandomgenerator.databinding.ActivityNetworkTrafficBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
-import com.example.utilities.StringTruncator
-import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.*
 
-class NetworkActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityNetworkBinding
+class NetworkTrafficActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityNetworkTrafficBinding
 
     private var previousMobileBytesSent: Long = TrafficStats.getMobileTxBytes()
     private var previousMobileBytesReceived: Long = TrafficStats.getMobileRxBytes()
@@ -38,7 +36,7 @@ class NetworkActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityNetworkBinding.inflate(layoutInflater)
+        binding = ActivityNetworkTrafficBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.progressBarTraffic.max = EnvVariables.DESIRED_LENGTH

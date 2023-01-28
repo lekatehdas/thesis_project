@@ -26,7 +26,7 @@
         android:theme="@style/Theme.PseudorandomGenerator"
         tools:targetApi="31">
         <activity
-            android:name=".NetworkActivity"
+            android:name=".NetworkTrafficActivity"
             android:exported="false" />
         <activity
             android:name=".TextToSpeechActivity"

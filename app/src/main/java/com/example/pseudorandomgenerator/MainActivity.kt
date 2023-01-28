@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnTraffic.setOnClickListener {
-            val intent = Intent(this, NetworkActivity::class.java)
+            val intent = Intent(this, NetworkTrafficActivity::class.java)
             startActivity(intent)
         }
     }
