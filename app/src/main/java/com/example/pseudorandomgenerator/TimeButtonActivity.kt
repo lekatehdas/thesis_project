@@ -6,40 +6,38 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.example.pseudorandomgenerator.databinding.ActivityTimeBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
 import com.example.utilities.StringTruncator
 import com.google.firebase.database.FirebaseDatabase
 
 class TimeButtonActivity: AppCompatActivity() {
-    private lateinit var btnTime: Button;
-
-    private lateinit var progressBar: ProgressBar;
-    private lateinit var txtBarPercent: TextView;
+    private lateinit var binding: ActivityTimeBinding
 
     private var generatedData = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_time)
+        binding = ActivityTimeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        initViews()
-        progressBar.max = EnvVariables.DESIRED_LENGTH
+        binding.progressBarTimeButton.max = EnvVariables.DESIRED_LENGTH
 
         initListeners()
     }
 
     private fun initListeners() {
-        btnTime.setOnClickListener {
-            if (generatedData.length > EnvVariables.DESIRED_LENGTH) {
-                saveData()
-                resetUiElements()
-                resetData()
-            }
-
+        binding.btnTimeButton.setOnClickListener {
             generatedData += (System.currentTimeMillis() % 1000).toString()
 
-            updateUiElements()
+            if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
+                saveData()
+                resetData()
+                resetUiElements()
+            } else {
+                updateUiElements()
+            }
         }
     }
 
@@ -48,8 +46,8 @@ class TimeButtonActivity: AppCompatActivity() {
     }
 
     private fun resetUiElements() {
-        progressBar.progress = 0
-        txtBarPercent.text = "0%"
+        binding.progressBarTimeButton.progress = 0
+        binding.txtTimeButtonBarPercent.text = "0%"
     }
 
     private fun saveData() {
@@ -61,15 +59,9 @@ class TimeButtonActivity: AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateUiElements() {
-        progressBar.progress = generatedData.length
+        binding.progressBarTimeButton.progress = generatedData.length
 
-        val percentage = (progressBar.progress.toFloat() / progressBar.max.toFloat()) * 100
-        txtBarPercent.text = "${percentage.toInt()}%"
-    }
-
-    private fun initViews() {
-        btnTime = findViewById(R.id.btnTimeButton)
-        progressBar = findViewById(R.id.progressBarTimeButton)
-        txtBarPercent = findViewById(R.id.txtTimeButtonBarPercent)
+        val percentage = (binding.progressBarTimeButton.progress.toFloat() / binding.progressBarTimeButton.max.toFloat()) * 100
+        binding.txtTimeButtonBarPercent.text = "${percentage.toInt()}%"
     }
 }
