@@ -49,5 +49,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, TextToSpeechActivity::class.java)
             startActivity(intent)
         }
+
+        binding.btnTraffic.setOnClickListener {
+            val intent = Intent(this, NetworkActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
