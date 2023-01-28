@@ -1,22 +1,15 @@
 package com.example.pseudorandomgenerator
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.pm.PackageManager
 import android.net.wifi.ScanResult
-import android.net.wifi.WifiManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
+import com.example.data_generator.WifiInformationGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityWifiBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
-import com.example.utilities.PermissionHelper
-import com.example.utilities.StringTruncator
-import com.google.firebase.database.FirebaseDatabase
 
 class WifiInfoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWifiBinding
@@ -26,8 +19,6 @@ class WifiInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityWifiBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        binding.progressBarWifiInfo.max = EnvVariables.DESIRED_LENGTH
 
         initListeners()
     }
@@ -39,39 +30,24 @@ class WifiInfoActivity : AppCompatActivity() {
     }
 
     private fun wifiInfoData() {
-        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        if (!wifiManager.isWifiEnabled) {
-            Toast.makeText(this, "WiFi is not enabled", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val generator = WifiInformationGenerator(this)
 
-        val permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            val permissionHelper = PermissionHelper(this@WifiInfoActivity)
-            permissionHelper.checkAndAskPermissions()
-        }
+        generatedData += generator.getWifiInformationData()
 
-        wifiManager.startScan()
-
-        for (result in wifiManager.scanResults) {
-            val formattedResult = formatResults(result)
-            generatedData += formattedResult
-
-            updateProgressInUi(generatedData)
-        }
-
-        if (!enoughData(generatedData)) {
+        if (!enoughData()) {
             val builder = AlertDialog.Builder(this)
-            builder.setMessage("""
-                Not enough data to generate key.
-                Refresh the wifi search and try again.
-                If problem persists, try in the area with multiple wifi connection points.
-            """.trimIndent())
+            builder.setMessage(
+                """
+                    Not enough data to generate key.
+                    Refresh the wifi search and try again.
+                    If problem persists, try in the area with multiple wifi connection points.
+                """.trimIndent()
+            )
 
             builder.create().show()
         } else {
+            Toast.makeText(this, "Data generation successful", Toast.LENGTH_LONG).show()
             saveData()
-            resetUiElements()
             resetData()
         }
     }
@@ -87,28 +63,5 @@ class WifiInfoActivity : AppCompatActivity() {
         generatedData = ""
     }
 
-    private fun resetUiElements() {
-        binding.progressBarWifiInfo.progress = 0
-        binding.txtWifiInfoBarPercent.text = "0%"
-    }
-
-    private fun enoughData(s: String) =
-        s.length >= EnvVariables.DESIRED_LENGTH
-
-    @SuppressLint("SetTextI18n")
-    private fun updateProgressInUi(s: String) {
-        binding.progressBarWifiInfo.progress = s.length
-
-        val percentage = (binding.progressBarWifiInfo.progress.toFloat() / binding.progressBarWifiInfo.max.toFloat()) * 100
-        binding.txtWifiInfoBarPercent.text = "${percentage.toInt()}%"
-    }
-
-    private fun formatResults(result: ScanResult): Any {
-        val timestamp = result.timestamp.toString()
-        return result.BSSID +
-                    result.level +
-                    result.frequency +
-                    timestamp.substring(timestamp.length - 4) +
-                    result.centerFreq0
-    }
+    private fun enoughData() = generatedData.length >= EnvVariables.DESIRED_LENGTH
 }
