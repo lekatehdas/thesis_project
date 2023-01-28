@@ -8,40 +8,56 @@ import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.example.data_generator.KeystrokeCallback
+import com.example.data_generator.KeystrokeDataGenerator
+import com.example.pseudorandomgenerator.databinding.ActivityTimeTypeingBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
 import com.example.utilities.StringTruncator
 import com.google.firebase.database.FirebaseDatabase
 
-class TimeTypingActivity : AppCompatActivity() {
-    private lateinit var editTxtTimeTyping: EditText
-    private lateinit var timeTypingProgressBar: ProgressBar
-    private lateinit var txtTimeTypingBarPercent: TextView
+class TimeTypingActivity : AppCompatActivity(), KeystrokeCallback {
+    private lateinit var binding: ActivityTimeTypeingBinding
+    private val keystrokeTracker = KeystrokeDataGenerator(this)
+
     private var generatedData = ""
 
-    private val textWatcher = object : TextWatcher {
-        override fun afterTextChanged(s: Editable?) {
-            if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
-                saveData()
-                resetUiElements()
-                resetData()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityTimeTypeingBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.progressBarTimeTyping.max = EnvVariables.DESIRED_LENGTH
+
+        initListeners()
+    }
+
+    private fun initListeners() {
+        binding.editTxtTimeTyping.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
+                    saveData()
+                    resetData()
+                    resetUiElements()
+                } else {
+                    updateUiElements()
+                }
             }
 
-            updateUiElements()
-        }
-
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                keystrokeTracker.onTextChanged(s!!, start, before, count)
+            }
+        })
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateUiElements() {
-        generatedData += (System.currentTimeMillis() % 1000).toString()
-        timeTypingProgressBar.progress = generatedData.length
+    fun updateUiElements() {
+        binding.progressBarTimeTyping.progress = generatedData.length
 
         val percentage =
-            (timeTypingProgressBar.progress.toFloat() / timeTypingProgressBar.max.toFloat()) * 100
-        txtTimeTypingBarPercent.text = "${percentage.toInt()}%"
+            (binding.progressBarTimeTyping.progress.toFloat() / binding.progressBarTimeTyping.max.toFloat()) * 100
+        binding.txtTimeTypingBarPercent.text = "${percentage.toInt()}%"
     }
 
     private fun resetData() {
@@ -49,8 +65,10 @@ class TimeTypingActivity : AppCompatActivity() {
     }
 
     private fun resetUiElements() {
-        timeTypingProgressBar.progress = 0
-        txtTimeTypingBarPercent.text = "0%"
+        binding.editTxtTimeTyping.text.clear()
+        binding.editTxtTimeTyping.clearFocus()
+        binding.progressBarTimeTyping.progress = 0
+        binding.txtTimeTypingBarPercent.text = "0%"
     }
 
     private fun saveData() {
@@ -60,23 +78,7 @@ class TimeTypingActivity : AppCompatActivity() {
         )
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_time_typeing)
-
-        initViews()
-        timeTypingProgressBar.max = EnvVariables.DESIRED_LENGTH
-
-        initListeners()
-    }
-
-    private fun initListeners() {
-        editTxtTimeTyping.addTextChangedListener(textWatcher)
-    }
-
-    private fun initViews() {
-        editTxtTimeTyping = findViewById(R.id.editTxtTimeTyping)
-        timeTypingProgressBar = findViewById(R.id.progressBarTimeTyping)
-        txtTimeTypingBarPercent = findViewById(R.id.txtTimeTypingBarPercent)
+    override fun updateActivityData(output: String) {
+        generatedData += output
     }
 }
