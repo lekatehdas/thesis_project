@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.pseudorandomgenerator.databinding.ActivityTextToScpeehBinding
+import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
 import com.example.utilities.SpeechRecognitionManager
 import com.example.utilities.StringTruncator
@@ -46,9 +47,10 @@ class TextToSpeechActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
-        val finalString = StringTruncator.truncate(generatedData, EnvVariables.DESIRED_LENGTH)
-        val dbRef = FirebaseDatabase.getInstance().getReference("speech")
-        dbRef.push().setValue(finalString)
+        DataSaver.saveData(
+            data = generatedData,
+            table = "speech"
+        )
     }
 
     private fun resetData() {

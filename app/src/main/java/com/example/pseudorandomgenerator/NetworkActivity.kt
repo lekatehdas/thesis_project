@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.pseudorandomgenerator.databinding.ActivityNetworkBinding
+import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
 import com.example.utilities.StringTruncator
 import com.google.firebase.database.FirebaseDatabase
@@ -51,6 +52,7 @@ class NetworkActivity : AppCompatActivity() {
             if (isDataGenerating) {
                 isDataGenerating = false
                 job?.cancel()
+                runOnUiThread { updateProgressInUi() }
             } else {
                 generateDataWithNetworkTraffic()
                 isDataGenerating = true
@@ -76,12 +78,18 @@ class NetworkActivity : AppCompatActivity() {
                     Log.d(TAG, ex.message.toString())
                 }
             }
-            saveData()
 
-            runOnUiThread { resetUiElements() }
-            resetData()
+            if (enoughData()) {
+                saveData()
+                runOnUiThread { resetUiElements() }
+                resetData()
+            }
         }
 
+    }
+
+    private fun enoughData(): Boolean {
+        return generatedData.length >= EnvVariables.DESIRED_LENGTH
     }
 
     private fun hasInternetConnection(): Boolean {
@@ -127,13 +135,15 @@ class NetworkActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
-        val finalString = StringTruncator.truncate(generatedData, EnvVariables.DESIRED_LENGTH)
-        val dbRef = FirebaseDatabase.getInstance().getReference("traffic")
-        dbRef.push().setValue(finalString)
+        DataSaver.saveData(
+            data = generatedData,
+            table = "traffic"
+        )
     }
 
     private fun resetData() {
         generatedData = ""
+        isDataGenerating = false
     }
 
     @SuppressLint("SetTextI18n")
@@ -146,7 +156,7 @@ class NetworkActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun updateProgressInUi() {
         binding.progressBarTraffic.progress = generatedData.length
-        binding.btnTrafficStart.text = if (isDataGenerating) "RESET" else "START"
+        binding.btnTrafficStart.text = if (isDataGenerating) "PAUSE" else "START"
 
         val percentage =
             (binding.progressBarTraffic.progress.toFloat() / binding.progressBarTraffic.max.toFloat()) * 100

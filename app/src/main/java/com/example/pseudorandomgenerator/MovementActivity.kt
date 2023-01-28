@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
 import com.example.utilities.StringTruncator
 import com.google.firebase.database.FirebaseDatabase
@@ -91,9 +92,10 @@ class MovementActivity : AppCompatActivity(),  SensorEventListener{
     }
 
     private fun saveData() {
-        val finalString = StringTruncator.truncate(generatedData, EnvVariables.DESIRED_LENGTH)
-        val dbRef = FirebaseDatabase.getInstance().getReference("movement")
-        dbRef.push().setValue(finalString)
+        DataSaver.saveData(
+            data = generatedData,
+            table = "movement"
+        )
     }
 
     private fun getValues(event: SensorEvent): String {

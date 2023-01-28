@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import com.example.pseudorandomgenerator.databinding.ActivityWifiBinding
+import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
 import com.example.utilities.PermissionHelper
 import com.example.utilities.StringTruncator
@@ -76,9 +77,10 @@ class WifiInfoActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
-        val finalString = StringTruncator.truncate(generatedData, EnvVariables.DESIRED_LENGTH)
-        val dbRef = FirebaseDatabase.getInstance().getReference("wifi")
-        dbRef.push().setValue(finalString)
+        DataSaver.saveData(
+            data = generatedData,
+            table = "wifi"
+        )
     }
 
     private fun resetData() {
