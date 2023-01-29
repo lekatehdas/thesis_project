@@ -7,19 +7,13 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
+import com.example.pseudorandomgenerator.databinding.ActivityMovementBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
-import com.example.utilities.StringTruncator
-import com.google.firebase.database.FirebaseDatabase
 
 class MovementActivity : AppCompatActivity(),  SensorEventListener{
-    private lateinit var btnStart: Button
-    private lateinit var txtMovementPercent: TextView
-    private lateinit var txtMovement: TextView
-    private lateinit var progressBar: ProgressBar
+    private lateinit var binding: ActivityMovementBinding
+
     private var generatedData = ""
 
     private lateinit var sensorManager: SensorManager
@@ -30,10 +24,10 @@ class MovementActivity : AppCompatActivity(),  SensorEventListener{
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_movement)
+        binding = ActivityMovementBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        initViews()
-        progressBar.max = EnvVariables.DESIRED_LENGTH
+        binding.progressBarMovement.max = EnvVariables.DESIRED_LENGTH
 
         initSensors()
         initListeners()
@@ -49,10 +43,10 @@ class MovementActivity : AppCompatActivity(),  SensorEventListener{
     }
 
     private fun initListeners() {
-        txtMovement.text = ""
+        binding.txtMovement.text = ""
 
-        btnStart.setOnClickListener {
-            btnStart.text = "IN PROGRESS"
+        binding.btnMovementStart.setOnClickListener {
+            binding.btnMovementStart.text = "IN PROGRESS"
             registerListeners()
         }
     }
@@ -68,18 +62,11 @@ class MovementActivity : AppCompatActivity(),  SensorEventListener{
         sensorManager.unregisterListener(this)
     }
 
-    private fun initViews() {
-        btnStart = findViewById(R.id.btnMovementStart)
-        txtMovementPercent = findViewById(R.id.txtMovementPercent)
-        txtMovement = findViewById(R.id.txtMovement)
-        progressBar = findViewById(R.id.progressBarMovement)
-    }
-
     override fun onSensorChanged(event: SensorEvent?) {
         if (generatedData.length > EnvVariables.DESIRED_LENGTH) {
             unregisterListeners()
             saveData()
-            btnStart.text = "START"
+            binding.btnMovementStart.text = "START"
             generatedData = ""
         }
 
@@ -88,7 +75,7 @@ class MovementActivity : AppCompatActivity(),  SensorEventListener{
         }
 
         generatedData += getValues(event)
-        progressBar.progress = generatedData.length
+        binding.progressBarMovement.progress = generatedData.length
     }
 
     private fun saveData() {
