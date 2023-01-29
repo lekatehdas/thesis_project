@@ -1,4 +1,4 @@
-package com.example.data_generator
+package com.example.interfaces
 
 interface KeystrokeCallback {
     fun updateActivityData(output: String)

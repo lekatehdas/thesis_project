@@ -5,16 +5,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.TextView
-import com.example.data_generator.KeystrokeCallback
+import com.example.interfaces.KeystrokeCallback
 import com.example.data_generator.KeystrokeDataGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityTimeTypeingBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
-import com.example.utilities.StringTruncator
-import com.google.firebase.database.FirebaseDatabase
 
 class TimeTypingActivity : AppCompatActivity(), KeystrokeCallback {
     private lateinit var binding: ActivityTimeTypeingBinding

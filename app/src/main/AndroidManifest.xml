@@ -29,7 +29,7 @@
             android:name=".NetworkTrafficActivity"
             android:exported="false" />
         <activity
-            android:name=".TextToSpeechActivity"
+            android:name=".SpeechToTextActivity"
             android:exported="false" />
         <activity
             android:name=".MovementActivity"

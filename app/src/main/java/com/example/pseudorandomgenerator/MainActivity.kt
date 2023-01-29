@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnSpeech.setOnClickListener {
-            val intent = Intent(this, TextToSpeechActivity::class.java)
+            val intent = Intent(this, SpeechToTextActivity::class.java)
             startActivity(intent)
         }
 

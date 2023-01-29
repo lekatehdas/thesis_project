@@ -4,29 +4,27 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.pseudorandomgenerator.databinding.ActivityTextToScpeehBinding
+import com.example.pseudorandomgenerator.databinding.ActivitySpeechToTextBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
-import com.example.utilities.SpeechRecognitionManager
-import com.example.utilities.StringTruncator
-import com.google.firebase.database.FirebaseDatabase
+import com.example.data_generator.SpeechDataGenerator
 
-class TextToSpeechActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityTextToScpeehBinding
-    private lateinit var speechRecognitionManager: SpeechRecognitionManager
+class SpeechToTextActivity : AppCompatActivity() {
+    private lateinit var binding: ActivitySpeechToTextBinding
+    private lateinit var speechDataGenerator: SpeechDataGenerator
     private var generatedData = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityTextToScpeehBinding.inflate(layoutInflater)
+        binding = ActivitySpeechToTextBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        speechRecognitionManager = SpeechRecognitionManager(this)
+        speechDataGenerator = SpeechDataGenerator(this)
 
         binding.progressBarSpeech.max = EnvVariables.DESIRED_LENGTH
 
         binding.btnStartSpeech.setOnClickListener {
-            speechRecognitionManager.startVoiceRecognition()
+            speechDataGenerator.startVoiceRecognition()
         }
     }
 
@@ -36,7 +34,7 @@ class TextToSpeechActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        generatedData += speechRecognitionManager.onActivityResult(requestCode, resultCode, data)
+        generatedData += speechDataGenerator.onActivityResult(requestCode, resultCode, data)
         updateUiElements()
 
         if (enoughData()) {

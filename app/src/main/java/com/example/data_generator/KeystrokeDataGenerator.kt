@@ -1,5 +1,7 @@
 package com.example.data_generator
 
+import com.example.interfaces.KeystrokeCallback
+
 class KeystrokeDataGenerator(private val activity: KeystrokeCallback) {
     fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         if (s.isEmpty()) {

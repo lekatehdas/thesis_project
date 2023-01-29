@@ -1,4 +1,4 @@
-package com.example.utilities
+package com.example.data_generator
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -9,7 +9,7 @@ import java.io.InputStream
 import kotlin.experimental.xor
 
 
-class SpeechRecognitionManager(private val context: Context) {
+class SpeechDataGenerator(private val context: Context) {
     private val REQUEST_CODE = 100
 
     fun startVoiceRecognition() {
