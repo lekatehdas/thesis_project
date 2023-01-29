@@ -56,6 +56,8 @@ class NetworkTrafficActivity : AppCompatActivity() {
         val generator = NetworkTrafficDataGenerator(this)
 
         job = CoroutineScope(Job()).launch {
+            while (true) {
+
             while (isActive && generatedData.length < EnvVariables.DESIRED_LENGTH) {
 
                 try {
@@ -74,6 +76,8 @@ class NetworkTrafficActivity : AppCompatActivity() {
                 saveData()
                 runOnUiThread { resetUiElements() }
                 resetData()
+            }
+
             }
         }
     }
