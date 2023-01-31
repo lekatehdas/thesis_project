@@ -1,4 +1,4 @@
-package com.example.utilities
+package com.example.converters
 
 object ByteArrayToBinaryStringConverter {
     fun convert(byteArray: ByteArray): String {

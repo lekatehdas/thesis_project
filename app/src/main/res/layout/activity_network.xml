@@ -4,50 +4,50 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TimeButtonActivity">
+    tools:context=".NetworkActivity">
 
     <TextView
-        android:id="@+id/txtTimeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/txtNetwork"
+        android:layout_width="285dp"
+        android:layout_height="129dp"
         android:layout_marginTop="32dp"
-        android:text="Keep pressing button until the progress bar is full"
+        android:text="Press START to monitor the network traffic size. This will only check the volume of the traffic in certai nintervals. This method requires an active internet connection."
+        android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnTimeButton"
-        android:layout_width="221dp"
-        android:layout_height="187dp"
-        android:text="Button"
+        android:id="@+id/btnNetworkStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="START"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
 
     <ProgressBar
-        android:id="@+id/progressBarTimeButton"
+        android:id="@+id/progressBarNetwork"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="200dp"
-        android:layout_height="31dp"
-        android:layout_marginTop="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnTimeButton"
+        android:layout_height="30dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnNetworkStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtTimeButton" />
+        app:layout_constraintTop_toBottomOf="@+id/txtNetwork" />
 
     <TextView
-        android:id="@+id/txtTimeButtonBarPercent"
+        android:id="@+id/txtNetworkPercent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="0%"
-        app:layout_constraintBottom_toBottomOf="@+id/progressBarTimeButton"
-        app:layout_constraintStart_toEndOf="@+id/progressBarTimeButton"
-        app:layout_constraintTop_toTopOf="@+id/progressBarTimeButton" />
-
+        app:layout_constraintBottom_toBottomOf="@+id/progressBarNetwork"
+        app:layout_constraintStart_toEndOf="@+id/progressBarNetwork"
+        app:layout_constraintTop_toTopOf="@+id/progressBarNetwork" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,11 +25,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        binding.btnWifi.setOnClickListener {
-            val intent = Intent(this, WifiInfoActivity::class.java)
-            startActivity(intent)
-        }
-
         binding.btnCamera.setOnClickListener {
             val intent = Intent(this, CameraActivity::class.java)
             startActivity(intent)
@@ -45,8 +40,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        binding.btnTraffic.setOnClickListener {
-            val intent = Intent(this, NetworkTrafficActivity::class.java)
+        binding.btnNetwork.setOnClickListener {
+            val intent = Intent(this, NetworkActivity::class.java)
             startActivity(intent)
         }
     }

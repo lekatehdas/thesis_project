@@ -18,7 +18,7 @@ class NetworkTrafficDataGenerator(private val context: Context) {
     private var previousWifiPacketsReceived: Long =
         TrafficStats.getTotalRxPackets() - previousMobilePacketsReceived
 
-    fun networkTrafficVolume(): String {
+    fun networkTrafficVolume(): ByteArray {
         val stringBuilder = StringBuilder()
         val mobileBytesSent = TrafficStats.getMobileTxBytes()
         val mobileBytesReceived = TrafficStats.getMobileRxBytes()
@@ -51,18 +51,18 @@ class NetworkTrafficDataGenerator(private val context: Context) {
         previousWifiPacketsSent = wifiPacketsSent
         previousWifiPacketsReceived = wifiPacketsReceived
 
-        return stringBuilder.toString()
+        return convertToByteArray(stringBuilder.toString())
     }
 
-    fun amplifyNetworkData(data: String): String {
+    private fun convertToByteArray(data: String): ByteArray {
         if (data.isEmpty()) {
-            return ""
+            return ByteArray(0)
         }
 
-        val numericData = data.toDouble()
-        val floatData: Double = numericData/numberOfInstalledAppsOnDevice()
+        val numericData = data.toFloat()
+        val floatData: Float = (numericData/numberOfInstalledAppsOnDevice())
 
-        return getFractionalPart(floatData)
+        return floatData.toString().toByteArray()
     }
 
     private fun numberOfInstalledAppsOnDevice(): Int {
@@ -74,10 +74,5 @@ class NetworkTrafficDataGenerator(private val context: Context) {
         }
 
         return numberOfApps
-    }
-
-    private fun getFractionalPart(num: Double): String {
-        return num.toString().split(".")[1]
-
     }
 }

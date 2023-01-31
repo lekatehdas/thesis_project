@@ -11,13 +11,13 @@ import androidx.core.app.ActivityCompat
 import com.example.utilities.PermissionHelper
 
 class WifiInformationDataGenerator(private val context: Context) {
-    private var generatedData = ""
+    private var generatedData = ByteArray(0)
 
-    fun getWifiInformationData(): String {
+    fun getWifiInformationData(): ByteArray {
         val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (!wifiManager.isWifiEnabled) {
             Toast.makeText(context, "WiFi is not enabled", Toast.LENGTH_SHORT).show()
-            return ""
+            return ByteArray(0)
         }
 
         val permission = ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -36,12 +36,12 @@ class WifiInformationDataGenerator(private val context: Context) {
         return generatedData
     }
 
-    private fun formatResults(result: ScanResult): Any {
+    private fun formatResults(result: ScanResult): ByteArray {
         val timestamp = result.timestamp.toString()
-        return result.BSSID +
+        return (result.BSSID.replace(":", "") +
                 result.level +
                 result.frequency +
                 timestamp.substring(timestamp.length - 4) +
-                result.centerFreq0
+                result.centerFreq0).toByteArray()
     }
 }

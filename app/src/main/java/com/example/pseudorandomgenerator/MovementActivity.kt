@@ -11,10 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.pseudorandomgenerator.databinding.ActivityMovementBinding
 import com.example.utilities.ByteArrayListXOR
-import com.example.utilities.ByteArrayToBinaryStringConverter
+import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.utilities.DataSaver.saveData
 import com.example.utilities.EnvVariables
-import com.example.utilities.FloatToByteArrayConverter
+import com.example.converters.FloatToByteArrayConverter
 
 class MovementActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMovementBinding

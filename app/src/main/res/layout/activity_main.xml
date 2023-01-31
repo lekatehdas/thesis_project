@@ -31,17 +31,6 @@
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
-        android:id="@+id/btnWifi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="WIFI-Info"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnMovement" />
-
-    <Button
         android:id="@+id/btnTyping"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -50,7 +39,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnWifi" />
+        app:layout_constraintTop_toBottomOf="@+id/btnMovement" />
 
     <Button
         android:id="@+id/btnCamera"
@@ -75,11 +64,11 @@
         app:layout_constraintTop_toBottomOf="@+id/btnCamera" />
 
     <Button
-        android:id="@+id/btnTraffic"
+        android:id="@+id/btnNetwork"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="NETWORK TRAFFIC"
+        android:text="NETWORK"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"

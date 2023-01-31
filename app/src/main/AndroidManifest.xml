@@ -27,7 +27,7 @@
         android:theme="@style/Theme.PseudorandomGenerator"
         tools:targetApi="31">
         <activity
-            android:name=".NetworkTrafficActivity"
+            android:name=".NetworkActivity"
             android:exported="false" />
         <activity
             android:name=".SpeechToTextActivity"
@@ -40,12 +40,6 @@
             android:exported="false" />
         <activity
             android:name=".TypingActivity"
-            android:exported="false" />
-        <activity
-            android:name=".WifiInfoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".TimeButtonActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
