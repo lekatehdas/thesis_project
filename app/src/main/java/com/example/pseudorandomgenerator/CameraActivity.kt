@@ -11,6 +11,7 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
@@ -20,11 +21,12 @@ import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.experimental.and
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
 
-    private var generatedData = ""
+    private var generatedData = ByteArray(0)
     private var isUsed = false
 
     private lateinit var cameraExecutor: ExecutorService
@@ -52,7 +54,7 @@ class CameraActivity : AppCompatActivity() {
                 stopCamera()
                 binding.btnCameraStart.text = "START"
 
-                if (generatedData.length >= EnvVariables.DESIRED_LENGTH) {
+                if (generatedData.size >= EnvVariables.DESIRED_LENGTH) {
                     saveData()
                     resetData()
                     resetUiElements()
@@ -65,13 +67,13 @@ class CameraActivity : AppCompatActivity() {
 
     private fun saveData() {
         DataSaver.saveData(
-            data = generatedData,
+            data = ByteArrayToBinaryStringConverter.convert(generatedData),
             table = "camera"
         )
     }
 
     private fun resetData() {
-        generatedData = ""
+        generatedData = ByteArray(0)
     }
 
     private fun resetUiElements() {
@@ -140,12 +142,11 @@ class CameraActivity : AppCompatActivity() {
             val average = getAverageValueOfTheFrame(image)
             val fractional: Long = average.split(".")[1].toLong()
 
-            val hexString = fractional.toString(16)
-            val char = hexToAscii(hexString)
+            val modTime = fractional % EnvVariables.PRIME_FOR_MOD
 
-            if (char.isNotEmpty()) {
-                generatedData = char + generatedData
-            }
+            val timeInBytes = modTime.toByte()
+
+            generatedData += byteArrayOf(timeInBytes and 0xff.toByte())
 
             runOnUiThread {
                 updateProgressInUi()
@@ -164,29 +165,10 @@ class CameraActivity : AppCompatActivity() {
 
         @SuppressLint("SetTextI18n")
         private fun updateProgressInUi() {
-            binding.progressBarCamera.progress = generatedData.length
+            binding.progressBarCamera.progress = generatedData.size
             val percentage =
                 (binding.progressBarCamera.progress.toFloat() / binding.progressBarCamera.max.toFloat()) * 100
             binding.txtCameraBarPercent.text = "${percentage.toInt()}%"
-        }
-
-        private fun hexToAscii(hex: String): String {
-            if (hex.length < 8) {
-                return ""
-            }
-
-            var decimal = BigInteger(hex, 16)
-            val sb = StringBuilder()
-
-            while (decimal > BigInteger.ZERO) {
-                val lastEightDigits = decimal.and(BigInteger.valueOf(0xff))
-
-                val ascii = lastEightDigits.toInt()
-                if (ascii in 32..126) sb.append(ascii.toChar())
-
-                decimal = decimal.shiftRight(8)
-            }
-            return sb.reverse().toString()
         }
 
         private fun ByteBuffer.toByteArray(): ByteArray {
