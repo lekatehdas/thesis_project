@@ -5,7 +5,7 @@ import kotlin.experimental.and
 object NanoTimeLeastSignificantEight {
     fun getTimeInLower8Bits(): ByteArray {
         val timeInLong = System.nanoTime()
-        val modTime = timeInLong % 524287
+        val modTime = timeInLong % EnvVariables.PRIME_FOR_MOD
 
         val timeInBytes = modTime.toByte()
 

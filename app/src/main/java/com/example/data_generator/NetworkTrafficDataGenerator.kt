@@ -3,6 +3,8 @@ package com.example.data_generator
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.TrafficStats
+import com.example.utilities.EnvVariables
+import kotlin.experimental.and
 
 class NetworkTrafficDataGenerator(private val context: Context) {
     private var previousMobileBytesSent: Long = TrafficStats.getMobileTxBytes()
@@ -20,6 +22,7 @@ class NetworkTrafficDataGenerator(private val context: Context) {
 
     fun networkTrafficVolume(): ByteArray {
         val stringBuilder = StringBuilder()
+
         val mobileBytesSent = TrafficStats.getMobileTxBytes()
         val mobileBytesReceived = TrafficStats.getMobileRxBytes()
         val mobilePacketsSent = TrafficStats.getMobileTxPackets()
@@ -29,18 +32,10 @@ class NetworkTrafficDataGenerator(private val context: Context) {
         val wifiPacketsSent = TrafficStats.getTotalTxPackets() - mobilePacketsSent
         val wifiPacketsReceived = TrafficStats.getTotalRxPackets() - mobilePacketsReceived
 
-        if ((mobileBytesSent - previousMobileBytesSent) != 0L || (mobileBytesReceived - previousMobileBytesReceived) != 0L) {
-            stringBuilder.append("${mobileBytesSent - previousMobileBytesSent}${mobileBytesReceived - previousMobileBytesReceived}")
-        }
-        if ((mobilePacketsSent - previousMobilePacketsSent) != 0L || (mobilePacketsReceived - previousMobilePacketsReceived) != 0L) {
-            stringBuilder.append("${mobilePacketsSent - previousMobilePacketsSent}${mobilePacketsReceived - previousMobilePacketsReceived}")
-        }
-        if ((wifiBytesSent - previousWifiBytesSent) != 0L || (wifiBytesReceived - previousWifiBytesReceived) != 0L) {
-            stringBuilder.append("${wifiBytesSent - previousWifiBytesSent}${wifiBytesReceived - previousWifiBytesReceived}")
-        }
-        if ((wifiPacketsSent - previousWifiPacketsSent) != 0L || (wifiPacketsReceived - previousWifiPacketsReceived) != 0L) {
-            stringBuilder.append("${wifiPacketsSent - previousWifiPacketsSent}${wifiPacketsReceived - previousWifiPacketsReceived}")
-        }
+        stringBuilder.append("${mobileBytesSent - previousMobileBytesSent}${mobileBytesReceived - previousMobileBytesReceived}")
+        stringBuilder.append("${mobilePacketsSent - previousMobilePacketsSent}${mobilePacketsReceived - previousMobilePacketsReceived}")
+        stringBuilder.append("${wifiBytesSent - previousWifiBytesSent}${wifiBytesReceived - previousWifiBytesReceived}")
+        stringBuilder.append("${wifiPacketsSent - previousWifiPacketsSent}${wifiPacketsReceived - previousWifiPacketsReceived}")
 
         previousMobileBytesSent = mobileBytesSent
         previousMobileBytesReceived = mobileBytesReceived
@@ -59,20 +54,11 @@ class NetworkTrafficDataGenerator(private val context: Context) {
             return ByteArray(0)
         }
 
-        val numericData = data.toFloat()
-        val floatData: Float = (numericData/numberOfInstalledAppsOnDevice())
+        val dataToFloat = data.toFloat()
+        val modData = dataToFloat % EnvVariables.PRIME_FOR_MOD
 
-        return floatData.toString().toByteArray()
-    }
+        val byte = modData.toInt().toByte()
 
-    private fun numberOfInstalledAppsOnDevice(): Int {
-        val flags = PackageManager.GET_META_DATA
-        val numberOfApps = context.packageManager.getInstalledPackages(flags).size
-
-        if (numberOfApps == 0) {
-            return 1
-        }
-
-        return numberOfApps
+        return byteArrayOf(byte and 0xff.toByte())
     }
 }

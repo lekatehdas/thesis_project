@@ -29,10 +29,12 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     private var gyroscope: Sensor? = null
     private var magnetometer: Sensor? = null
     private var rotation: Sensor? = null
+    private var decibel: Sensor? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
         binding = ActivityMovementBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -49,6 +51,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
         rotation = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+        decibel = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
     }
 
     private fun initListeners() {

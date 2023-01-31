@@ -75,7 +75,7 @@ class NetworkActivity : AppCompatActivity() {
                     try {
                         networkData += generator.networkTrafficVolume()
                         runOnUiThread { updateProgressInUi() }
-                        delay(1500)
+                        delay(500)
 
                     } catch (ex: Exception) {
                         Log.d(TAG, ex.message.toString())
