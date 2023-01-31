@@ -1,5 +1,6 @@
 package com.example.pseudorandomgenerator
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.hardware.Sensor
@@ -51,8 +52,6 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun initListeners() {
-        binding.txtMovement.text = ""
-
         binding.btnMovementStart.setOnClickListener {
             binding.btnMovementStart.text = "IN PROGRESS"
             registerListeners()
@@ -82,8 +81,9 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             val resultString = ByteArrayToBinaryStringConverter.convert(result)
             saveData(resultString, "movement")
 
-            binding.btnMovementStart.text = "START"
             resetDataArrays()
+            resetUiElements()
+            return
         }
 
         if (event == null) {
@@ -91,7 +91,20 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         }
 
         getDataFromEvent(event)
+        updateUiElements()
+    }
 
+    @SuppressLint("SetTextI18n")
+    private fun updateUiElements() {
+        binding.progressBarMovement.progress = smallestArraySize()
+        val percentage =
+            (binding.progressBarMovement.progress.toFloat() / binding.progressBarMovement.max.toFloat()) * 100
+        binding.txtMovementPercent.text = "${percentage.toInt()}%"
+    }
+
+    private fun resetUiElements() {
+        binding.btnMovementStart.text = "START"
+        binding.txtMovementPercent.text = "0%"
         binding.progressBarMovement.progress = smallestArraySize()
     }
 

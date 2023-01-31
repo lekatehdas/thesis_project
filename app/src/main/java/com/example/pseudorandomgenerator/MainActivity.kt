@@ -20,13 +20,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initListeners() {
-        binding.btnTimeButton.setOnClickListener {
-            val intent = Intent(this, TimeButtonActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.btnTimeTyping.setOnClickListener {
-            val intent = Intent(this, TimeTypingActivity::class.java)
+        binding.btnTyping.setOnClickListener {
+            val intent = Intent(this, TypingActivity::class.java)
             startActivity(intent)
         }
 
