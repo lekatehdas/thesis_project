@@ -23,13 +23,14 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     private var gyroscopeData = ByteArray(0)
     private var magnetometerData = ByteArray(0)
     private var rotationData = ByteArray(0)
+    private var gravityData = ByteArray(0)
 
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
     private var gyroscope: Sensor? = null
     private var magnetometer: Sensor? = null
     private var rotation: Sensor? = null
-    private var decibel: Sensor? = null
+    private var gravity: Sensor? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +52,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
         rotation = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
-        decibel = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+        gravity = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
     }
 
     private fun initListeners() {
@@ -66,6 +67,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
         sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL)
         sensorManager.registerListener(this, rotation, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(this, gravity, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     private fun unregisterListeners() {
@@ -76,11 +78,12 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
             unregisterListeners()
             val result = ByteArrayListXOR.xor(listOf(
-                    accelerationData,
-                    gyroscopeData,
-                    magnetometerData,
-                    rotationData
-                ))
+                accelerationData,
+                gyroscopeData,
+                magnetometerData,
+                rotationData,
+                gravityData
+            ))
             val resultString = ByteArrayToBinaryStringConverter.convert(result)
             saveData(resultString, "movement")
 
@@ -116,6 +119,16 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         if (event.sensor.name.lowercase().contains("rotation vector")) rotationVectorDataHandler(event)
         if (event.sensor.name.lowercase().contains("magnetometer")) magnetometerDataHandler(event)
         if (event.sensor.name.lowercase().contains("gyroscope")) gyroscopeDataHandler(event)
+        if (event.sensor.name.lowercase().contains("gravity")) gravityDataHandler(event)
+    }
+
+    private fun gravityDataHandler(event: SensorEvent) {
+        if (gravityData.size == EnvVariables.DESIRED_LENGTH) {
+            sensorManager.unregisterListener(this, gravity)
+        } else {
+            val byteArray = getBytes(event)
+            gravityData += byteArray
+        }
     }
 
     private fun gyroscopeDataHandler(event: SensorEvent) {
@@ -159,6 +172,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         gyroscopeData = ByteArray(0)
         magnetometerData = ByteArray(0)
         rotationData = ByteArray(0)
+        gravityData = ByteArray(0)
     }
 
     private fun smallestArraySize(): Int {
@@ -166,7 +180,8 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             accelerationData,
             gyroscopeData,
             magnetometerData,
-            rotationData
+            rotationData,
+            gravityData
         )
         return arrays.minBy { it.size }.size ?: 0
     }
