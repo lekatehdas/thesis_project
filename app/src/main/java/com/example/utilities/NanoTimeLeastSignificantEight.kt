@@ -1,11 +1,14 @@
 package com.example.utilities
 
+import kotlin.experimental.and
+
 object NanoTimeLeastSignificantEight {
     fun getTimeInLower8Bits(): ByteArray {
-        val timeInFloat = System.nanoTime() / 1000000000.0f
-        val timeInInt = java.lang.Float.floatToIntBits(timeInFloat)
-        val lower8Bits = timeInInt and 0xff
+        val timeInLong = System.nanoTime()
+        val modTime = timeInLong % 524287
 
-        return byteArrayOf(lower8Bits.toByte())
+        val timeInBytes = modTime.toByte()
+
+        return byteArrayOf(timeInBytes and 0xff.toByte())
     }
 }

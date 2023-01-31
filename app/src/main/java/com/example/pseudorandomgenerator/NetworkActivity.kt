@@ -34,12 +34,7 @@ class NetworkActivity : AppCompatActivity() {
 
         binding.progressBarNetwork.max = EnvVariables.DESIRED_LENGTH
 
-        startProcess()
-    }
-
-    private fun startProcess() {
-        wifiPart()
-        dataPart()
+        initListeners()
     }
 
     private fun wifiPart() {
@@ -49,13 +44,10 @@ class NetworkActivity : AppCompatActivity() {
         if (wifiData.size < EnvVariables.DESIRED_LENGTH) notEnoughScanData("Wifi")
     }
 
-    private fun dataPart() {
-        initListeners()
-    }
-
     @SuppressLint("SetTextI18n")
     private fun initListeners() {
         binding.btnNetworkStart.setOnClickListener {
+            wifiPart()
             if (isDataGenerating) {
                 isDataGenerating = false
                 job?.cancel()
@@ -92,8 +84,8 @@ class NetworkActivity : AppCompatActivity() {
 
                 if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
                     saveData()
-                    runOnUiThread { resetUiElements() }
                     resetData()
+                    runOnUiThread { resetUiElements() }
                 }
             }
         }
@@ -108,8 +100,8 @@ class NetworkActivity : AppCompatActivity() {
 
     private fun saveData() {
         val list = listOf(
-            networkData,
-            wifiData
+            networkData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray(),
+            wifiData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
         )
         val result = ByteArrayListXOR.xor(list)
         val string = ByteArrayToBinaryStringConverter.convert(result)
