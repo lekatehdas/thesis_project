@@ -116,7 +116,7 @@ class SpeechToTextActivity : AppCompatActivity() {
             audioData,
             stringData
         )
-        return arrays.minBy { it.size }.size ?: 0
+        return arrays.minBy { it.size }.size
     }
 
     private fun enoughData(): Boolean {

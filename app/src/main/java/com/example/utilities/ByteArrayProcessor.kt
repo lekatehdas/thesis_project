@@ -11,7 +11,7 @@ class ByteArrayProcessor {
 
         val newByteArray = ByteArray(byteArray.size / 2)
         for (i in byteArray.indices step 2) {
-            newByteArray[i / 2] = (byteArray[i] xor byteArray[i + 1]).toByte()
+            newByteArray[i / 2] = (byteArray[i] xor byteArray[i + 1])
         }
 
         return newByteArray
