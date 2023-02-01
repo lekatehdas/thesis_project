@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.speech.RecognizerIntent
 import java.io.InputStream
-import kotlin.experimental.xor
 
 
 class SpeechDataGenerator(private val context: Context) {
@@ -24,37 +23,28 @@ class SpeechDataGenerator(private val context: Context) {
     }
 
     @SuppressLint("Recycle")
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): String {
-        if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-            val resultBytes = results?.joinToString(" ")?.toByteArray()
-
-            val audioUri = data?.data
-            val filestream: InputStream? = audioUri?.let {
-                context.contentResolver.openInputStream(it)
-            }
-
-            val audioResult = filestream?.readBytes()
-            filestream?.close()
-
-            val audioReversed = audioResult?.reversedArray()
-            val audioSliced = audioReversed?.sliceArray(0 until resultBytes?.size!!)
-
-            val xorArray = xorByteArrays(resultBytes!!, audioSliced!!)
-
-            return byteArrayToHexString(xorArray)
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): List<ByteArray> {
+        if (!activitySuccessful(requestCode, resultCode)) {
+            return listOf(ByteArray(0), ByteArray(0))
         }
 
-        return ""
+        if (data == null) return listOf(ByteArray(0), ByteArray(0))
+
+
+        val stringResult = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            ?: return listOf(ByteArray(0), ByteArray(0))
+        val stringByteArray = stringResult.joinToString(" ").toByteArray()
+
+        val audioUri = data.data
+        val audioData: InputStream = audioUri?.let { context.contentResolver.openInputStream(it) }
+            ?: return listOf(ByteArray(0), ByteArray(0))
+
+        val audioByteArray = audioData.readBytes()
+        audioData.close()
+
+        return listOf(stringByteArray, audioByteArray)
     }
 
-    private fun byteArrayToHexString(bytes: ByteArray): String {
-        return bytes.joinToString(separator = "") {
-            it.toString(16).padStart(2, '0')
-        }
-    }
-
-    private fun xorByteArrays(a: ByteArray, b: ByteArray): ByteArray {
-        return a.zip(b) { x, y -> (x xor y) }.toByteArray()
-    }
+    private fun activitySuccessful(requestCode: Int, resultCode: Int) =
+        requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK
 }
