@@ -23,7 +23,7 @@ import kotlin.experimental.and
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
 
-    private var generatedData = ByteArray(0)
+    private var cameraData = ByteArray(0)
     private var isUsed = false
 
     private lateinit var cameraExecutor: ExecutorService
@@ -51,7 +51,7 @@ class CameraActivity : AppCompatActivity() {
                 stopCamera()
                 binding.btnCameraStart.text = "START"
 
-                if (generatedData.size >= EnvVariables.DESIRED_LENGTH) {
+                if (cameraData.size >= EnvVariables.DESIRED_LENGTH) {
                     saveData()
                     resetData()
                     resetUiElements()
@@ -64,13 +64,13 @@ class CameraActivity : AppCompatActivity() {
 
     private fun saveData() {
         DataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(generatedData),
+            data = ByteArrayToBinaryStringConverter.convert(cameraData),
             table = "camera"
         )
     }
 
     private fun resetData() {
-        generatedData = ByteArray(0)
+        cameraData = ByteArray(0)
     }
 
     private fun resetUiElements() {
@@ -80,7 +80,7 @@ class CameraActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateProgressInUi() {
-        binding.progressBarCamera.progress = generatedData.size
+        binding.progressBarCamera.progress = cameraData.size
         val percentage =
             (binding.progressBarCamera.progress.toFloat() / binding.progressBarCamera.max.toFloat()) * 100
         binding.txtCameraBarPercent.text = "${percentage.toInt()}%"
@@ -147,11 +147,12 @@ class CameraActivity : AppCompatActivity() {
             val average = getAverageValueOfTheFrame(image)
             val fractional: Long = average.split(".")[1].toLong()
 
-            val modTime = fractional % EnvVariables.PRIME_FOR_MOD
+            val modData = fractional % EnvVariables.PRIME_FOR_MOD
 
-            val timeInBytes = modTime.toByte()
+            val dataInBytes = modData.toByte()
 
-            generatedData += byteArrayOf(timeInBytes and 0xff.toByte())
+            if (cameraData.size < EnvVariables.DESIRED_LENGTH)
+                cameraData += byteArrayOf(dataInBytes and 0xff.toByte())
 
             runOnUiThread {
                 updateProgressInUi()
