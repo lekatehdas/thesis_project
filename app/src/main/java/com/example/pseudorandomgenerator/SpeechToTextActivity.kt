@@ -92,7 +92,7 @@ class SpeechToTextActivity : AppCompatActivity() {
     private fun enoughStringData() = stringData.size >= EnvVariables.DESIRED_LENGTH
 
     private fun enoughAudioData() = audioData.size >= EnvVariables.DESIRED_LENGTH
-    
+
     private fun resetData() {
         stringData = ByteArray(0)
         audioData = ByteArray(0)
