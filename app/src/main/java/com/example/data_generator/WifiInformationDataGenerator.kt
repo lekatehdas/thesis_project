@@ -8,10 +8,12 @@ import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.utilities.PermissionHelper
 
 class WifiInformationDataGenerator(private val context: Context) {
-    private var generatedData = ByteArray(0)
+    private var wifiData = ByteArray(0)
+    private val seen = mutableSetOf<String>()
 
     fun getWifiInformationData(): ByteArray {
         val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -29,17 +31,24 @@ class WifiInformationDataGenerator(private val context: Context) {
         wifiManager.startScan()
 
         for (result in wifiManager.scanResults) {
-            val formattedResult = formatResults(result)
-            generatedData += formattedResult
-        }
+            val data = getResults(result)
 
-        return generatedData
+            if (data != null) wifiData += data
+        }
+        println(wifiData.size)
+
+        return wifiData
     }
 
-    private fun formatResults(result: ScanResult): ByteArray {
+    private fun getResults(result: ScanResult): ByteArray? {
+        if (result.BSSID.substring(0, 9) in seen)
+            return null
+
+        seen.add(result.BSSID.substring(0, 9))
+
         val timestamp = result.timestamp.toString()
         return (result.BSSID.replace(":", "") +
-                result.level +
+                result.level.toString().replace("-", "") +
                 result.frequency +
                 timestamp.substring(timestamp.length - 4) +
                 result.centerFreq0).toByteArray()
