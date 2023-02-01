@@ -36,12 +36,12 @@ class CameraActivity : AppCompatActivity() {
 
         binding.progressBarCamera.max = EnvVariables.DESIRED_LENGTH
 
-        useCamera()
+        initListeners()
 
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    private fun useCamera() {
+    private fun initListeners() {
         binding.btnCameraStart.setOnClickListener {
             if (!isUsed) {
                 startCamera()
