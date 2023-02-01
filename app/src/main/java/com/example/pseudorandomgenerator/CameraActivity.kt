@@ -15,9 +15,6 @@ import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
-import com.example.utilities.StringTruncator
-import com.google.firebase.database.FirebaseDatabase
-import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -79,6 +76,14 @@ class CameraActivity : AppCompatActivity() {
     private fun resetUiElements() {
         binding.progressBarCamera.progress = 0
         binding.txtCameraBarPercent.text = "0%"
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateProgressInUi() {
+        binding.progressBarCamera.progress = generatedData.size
+        val percentage =
+            (binding.progressBarCamera.progress.toFloat() / binding.progressBarCamera.max.toFloat()) * 100
+        binding.txtCameraBarPercent.text = "${percentage.toInt()}%"
     }
 
     private fun startCamera() {
@@ -161,14 +166,6 @@ class CameraActivity : AppCompatActivity() {
             val pixels = data.map { it.toInt() and 0xFF }
 
             return pixels.average().toString()
-        }
-
-        @SuppressLint("SetTextI18n")
-        private fun updateProgressInUi() {
-            binding.progressBarCamera.progress = generatedData.size
-            val percentage =
-                (binding.progressBarCamera.progress.toFloat() / binding.progressBarCamera.max.toFloat()) * 100
-            binding.txtCameraBarPercent.text = "${percentage.toInt()}%"
         }
 
         private fun ByteBuffer.toByteArray(): ByteArray {
