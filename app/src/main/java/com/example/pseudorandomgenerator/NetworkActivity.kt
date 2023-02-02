@@ -22,7 +22,7 @@ class NetworkActivity : AppCompatActivity() {
     private lateinit var binding: ActivityNetworkBinding
 
     private var networkData = ByteArray(0)
-    private var wifiData = ByteArray(0)
+//    private var wifiData = ByteArray(0)
 
     private var isDataGenerating = false
     private var job: Job? = null
@@ -37,17 +37,17 @@ class NetworkActivity : AppCompatActivity() {
         initListeners()
     }
 
-    private fun wifiPart() {
-        val wifiDataGenerator = WifiInformationDataGenerator(this)
-        wifiData = wifiDataGenerator.getWifiInformationData()
-
-        if (wifiData.size < EnvVariables.DESIRED_LENGTH) notEnoughScanData("Wifi")
-    }
+//    private fun wifiPart() {
+//        val wifiDataGenerator = WifiInformationDataGenerator(this)
+//        wifiData = wifiDataGenerator.getWifiInformationData()
+//
+//        if (wifiData.size < EnvVariables.DESIRED_LENGTH) notEnoughScanData("Wifi")
+//    }
 
     @SuppressLint("SetTextI18n")
     private fun initListeners() {
         binding.btnNetworkStart.setOnClickListener {
-            wifiPart()
+//            wifiPart()
             if (isDataGenerating) {
                 isDataGenerating = false
                 job?.cancel()
@@ -101,7 +101,7 @@ class NetworkActivity : AppCompatActivity() {
     private fun saveData() {
         val list = listOf(
             networkData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray(),
-            wifiData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
+//            wifiData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
         )
         val result = ByteArrayListXOR.xor(list)
         val string = ByteArrayToBinaryStringConverter.convert(result)
@@ -114,8 +114,8 @@ class NetworkActivity : AppCompatActivity() {
 
     private fun resetData() {
         networkData = ByteArray(0)
-        wifiData = ByteArray(0)
-        isDataGenerating = false
+//        wifiData = ByteArray(0)
+//        isDataGenerating = false
     }
 
     @SuppressLint("SetTextI18n")
@@ -137,7 +137,7 @@ class NetworkActivity : AppCompatActivity() {
 
     private fun smallestArraySize(): Int {
         val arrays = listOf(
-            wifiData,
+//            wifiData,
             networkData
         )
         return arrays.minBy { it.size }.size

@@ -12,9 +12,9 @@ import android.os.Bundle
 import com.example.pseudorandomgenerator.databinding.ActivityMovementBinding
 import com.example.utilities.ByteArrayListXOR
 import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.utilities.DataSaver.saveData
 import com.example.utilities.EnvVariables
 import com.example.converters.FloatToByteArrayConverter
+import com.example.utilities.DataSaver
 
 class MovementActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMovementBinding
@@ -75,29 +75,34 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
-            unregisterListeners()
-            val result = ByteArrayListXOR.xor(listOf(
-                accelerationData,
-                gyroscopeData,
-                magnetometerData,
-                rotationData,
-                gravityData
-            ))
-            val resultString = ByteArrayToBinaryStringConverter.convert(result)
-            saveData(resultString, "movement")
+        if (event == null) return
 
+        if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
+//            unregisterListeners()
+            saveData()
             resetDataArrays()
             resetUiElements()
-            return
-        }
-
-        if (event == null) {
-            return
+//            return
         }
 
         getDataFromEvent(event)
         updateUiElements()
+    }
+
+    private fun saveData() {
+        val lists = listOf(
+            accelerationData,
+            gyroscopeData,
+            magnetometerData,
+            rotationData,
+            gravityData
+        )
+        val xor = ByteArrayListXOR.xor(lists)
+
+        val result = ByteArrayToBinaryStringConverter.convert(xor)
+        DataSaver.saveData(
+            data = result,
+            table = "movement")
     }
 
     @SuppressLint("SetTextI18n")
@@ -111,7 +116,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     private fun resetUiElements() {
         binding.btnMovementStart.text = "START"
         binding.txtMovementPercent.text = "0%"
-        binding.progressBarMovement.progress = smallestArraySize()
+        binding.progressBarMovement.progress = 0
     }
 
     private fun getDataFromEvent(event: SensorEvent) {
@@ -173,6 +178,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         magnetometerData = ByteArray(0)
         rotationData = ByteArray(0)
         gravityData = ByteArray(0)
+        registerListeners()
     }
 
     private fun smallestArraySize(): Int {

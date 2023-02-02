@@ -15,7 +15,6 @@ import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.data_generator.AudioDataGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.utilities.ByteArrayListXOR
-import com.example.utilities.ByteArrayProcessor
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
 import java.nio.ByteBuffer
@@ -73,9 +72,9 @@ class CameraActivity : AppCompatActivity() {
         )
         val xor = ByteArrayListXOR.xor(list)
 
-        DataSaver.appendDataToKey(
+        DataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(xor),
-            key = "camera_appended"
+            table = "camera"
         )
     }
 
