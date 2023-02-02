@@ -12,7 +12,10 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import com.example.converters.ByteArrayToBinaryStringConverter
+import com.example.data_generator.AudioDataGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
+import com.example.utilities.ByteArrayListXOR
+import com.example.utilities.ByteArrayProcessor
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
 import java.nio.ByteBuffer
@@ -24,6 +27,7 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
 
     private var cameraData = ByteArray(0)
+    private var audioData = ByteArray(0)
     private var isUsed = false
 
     private lateinit var cameraExecutor: ExecutorService
@@ -51,7 +55,7 @@ class CameraActivity : AppCompatActivity() {
                 stopCamera()
                 binding.btnCameraStart.text = "START"
 
-                if (cameraData.size >= EnvVariables.DESIRED_LENGTH) {
+                if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
                     saveData()
                     resetData()
                     resetUiElements()
@@ -63,14 +67,21 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
-        DataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(cameraData),
-            table = "camera"
+        val list = listOf(
+            cameraData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray(),
+            audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
+        )
+        val xor = ByteArrayListXOR.xor(list)
+
+        DataSaver.appendDataToKey(
+            data = ByteArrayToBinaryStringConverter.convert(xor),
+            key = "camera_appended"
         )
     }
 
     private fun resetData() {
         cameraData = ByteArray(0)
+        audioData = ByteArray(0)
     }
 
     private fun resetUiElements() {
@@ -80,7 +91,7 @@ class CameraActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateProgressInUi() {
-        binding.progressBarCamera.progress = cameraData.size
+        binding.progressBarCamera.progress = smallestArraySize()
         val percentage =
             (binding.progressBarCamera.progress.toFloat() / binding.progressBarCamera.max.toFloat()) * 100
         binding.txtCameraBarPercent.text = "${percentage.toInt()}%"
@@ -141,20 +152,45 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    private fun smallestArraySize(): Int {
+        val arrays = listOf(
+            cameraData,
+            audioData
+        )
+        return arrays.minBy { it.size }.size ?: 0
+    }
+
     inner class ImageAnalyzer : ImageAnalysis.Analyzer {
         @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
         override fun analyze(image: ImageProxy) {
-            val average = getAverageValueOfTheFrame(image)
-            val fractional: Long = average.split(".")[1].toLong()
+            if (cameraData.size < EnvVariables.DESIRED_LENGTH) {
+                val average = getAverageValueOfTheFrame(image)
 
-            val modData = fractional % EnvVariables.PRIME_FOR_MOD
+                val imageDataFractional: Long = average.split(".")[1].toLong()
+                val modData = imageDataFractional % EnvVariables.PRIME_FOR_MOD
+                val dataInBytes = modData.toByte()
 
-            val dataInBytes = modData.toByte()
-
-            if (cameraData.size < EnvVariables.DESIRED_LENGTH)
                 cameraData += byteArrayOf(dataInBytes and 0xff.toByte())
+            }
+
+            if (audioData.size < EnvVariables.DESIRED_LENGTH) {
+                val audio = AudioDataGenerator(this@CameraActivity).getDecibelLevel()
+
+                if (audio.toString() != "-Infinity") {
+                    val audioFractional = audio.toString().split(".")[1].toLong()
+                    val audioMod = audioFractional % EnvVariables.PRIME_FOR_MOD
+                    val audioInBytes = audioMod.toByte()
+
+                    audioData += byteArrayOf(audioInBytes and 0xff.toByte())
+                }
+            }
 
             runOnUiThread {
+                if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
+                    saveData()
+                    resetData()
+                    resetUiElements()
+                }
                 updateProgressInUi()
             }
 

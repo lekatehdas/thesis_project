@@ -35,7 +35,6 @@ class WifiInformationDataGenerator(private val context: Context) {
 
             if (data != null) wifiData += data
         }
-        println(wifiData.size)
 
         return wifiData
     }
