@@ -6,12 +6,9 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.View
-import android.widget.EditText
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.pseudorandomgenerator.databinding.ActivityTypeingBinding
 import com.example.utilities.*
-import kotlin.random.Random
 
 class TypingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTypeingBinding
@@ -23,7 +20,9 @@ class TypingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTypeingBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         binding.progressBarTimeTyping.max = EnvVariables.DESIRED_LENGTH
+
         initListeners()
         }
 

@@ -29,6 +29,12 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     private var rotationDataXOR = ByteArray(0)
     private var gravityDataXOR = ByteArray(0)
 
+    private var accelerationDataXOROldWay = ByteArray(0)
+    private var gyroscopeDataXOROldWay = ByteArray(0)
+    private var magnetometerDataXOROldWay = ByteArray(0)
+    private var rotationDataXOROldWay = ByteArray(0)
+    private var gravityDataXOROldWay = ByteArray(0)
+
     private var accelerationDataLSB = ByteArray(0)
     private var gyroscopeDataLSB = ByteArray(0)
     private var magnetometerDataLSB = ByteArray(0)
@@ -103,9 +109,25 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
 
     private fun saveData() {
         saveXOR()
+        saveXOROld()
         saveLSB()
         saveTime()
         saveEachDataArray()
+    }
+
+    private fun saveXOROld() {
+        val listsOfXOR = listOf(
+            accelerationDataXOROldWay,
+            gyroscopeDataXOROldWay,
+            magnetometerDataXOROldWay,
+            rotationDataXOROldWay,
+            gravityDataXOROldWay
+        )
+        val xor = ByteArrayListXOR.xor(listsOfXOR)
+        DataSaver.saveData(
+            data = ByteArrayToBinaryStringConverter.convert(xor),
+            table = "movement_XOR_old_way"
+        )
     }
 
     private fun saveEachDataArray() {
@@ -196,6 +218,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             sensorManager.unregisterListener(this, gravity)
         } else {
             gravityDataXOR += getBytesXORWay(event)
+            gravityDataXOROldWay += getBytesXOROldWay(event)
             gravityDataLSB += getBytesLSBWay(event)
         }
     }
@@ -205,6 +228,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             sensorManager.unregisterListener(this, gyroscope)
         } else {
             gyroscopeDataXOR += getBytesXORWay(event)
+            gyroscopeDataXOROldWay += getBytesXOROldWay(event)
             gyroscopeDataLSB += getBytesLSBWay(event)
         }
     }
@@ -214,6 +238,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             sensorManager.unregisterListener(this, magnetometer)
         } else {
             magnetometerDataXOR += getBytesXORWay(event)
+            magnetometerDataXOROldWay += getBytesXOROldWay(event)
             magnetometerDataLSB += getBytesLSBWay(event)
         }
     }
@@ -223,6 +248,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             sensorManager.unregisterListener(this, rotation)
         } else {
             rotationDataXOR += getBytesXORWay(event)
+            rotationDataXOROldWay += getBytesXOROldWay(event)
             rotationDataLSB += getBytesLSBWay(event)
         }
     }
@@ -232,6 +258,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             sensorManager.unregisterListener(this, accelerometer)
         } else {
             accelerationDataXOR += getBytesXORWay(event)
+            accelerationDataXOROldWay += getBytesXOROldWay(event)
             accelerationDataLSB += getBytesLSBWay(event)
         }
     }
@@ -242,6 +269,12 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         magnetometerDataXOR = ByteArray(0)
         rotationDataXOR = ByteArray(0)
         gravityDataXOR = ByteArray(0)
+
+        accelerationDataXOROldWay = ByteArray(0)
+        gyroscopeDataXOROldWay = ByteArray(0)
+        magnetometerDataXOROldWay = ByteArray(0)
+        rotationDataXOROldWay = ByteArray(0)
+        gravityDataXOROldWay = ByteArray(0)
 
         accelerationDataLSB = ByteArray(0)
         gyroscopeDataLSB = ByteArray(0)
@@ -278,7 +311,15 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         return ByteArrayListXOR.xor(distilledBytes)
     }
 
-    fun distillByteArrays(byteArrays: List<ByteArray>): List<ByteArray> {
+    private fun getBytesXOROldWay(event: SensorEvent): ByteArray {
+        val values: FloatArray = event.values
+
+        val byteList: List<ByteArray> = NumberToByteArrayConverter.convertFloat(values.toList())
+
+        return ByteArrayListXOR.xor(byteList)
+    }
+
+    private fun distillByteArrays(byteArrays: List<ByteArray>): List<ByteArray> {
         return byteArrays.map { array ->
             var result = array[0]
             for (i in 1 until array.size) {
