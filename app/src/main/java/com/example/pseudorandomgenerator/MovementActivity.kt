@@ -12,19 +12,29 @@ import android.os.Bundle
 import com.example.pseudorandomgenerator.databinding.ActivityMovementBinding
 import com.example.utilities.ByteArrayListXOR
 import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.utilities.EnvVariables
 import com.example.converters.NumberToByteArrayConverter
+import com.example.utilities.EnvVariables
 import com.example.utilities.DataSaver
 import com.example.utilities.LeastSignificantBits
+import kotlin.experimental.xor
 
 class MovementActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMovementBinding
 
-    private var accelerationData = ByteArray(0)
-    private var gyroscopeData = ByteArray(0)
-    private var magnetometerData = ByteArray(0)
-    private var rotationData = ByteArray(0)
-    private var gravityData = ByteArray(0)
+    private val desiredLength = EnvVariables.DESIRED_LENGTH
+
+    private var accelerationDataXOR = ByteArray(0)
+    private var gyroscopeDataXOR = ByteArray(0)
+    private var magnetometerDataXOR = ByteArray(0)
+    private var rotationDataXOR = ByteArray(0)
+    private var gravityDataXOR = ByteArray(0)
+
+    private var accelerationDataLSB = ByteArray(0)
+    private var gyroscopeDataLSB = ByteArray(0)
+    private var magnetometerDataLSB = ByteArray(0)
+    private var rotationDataLSB = ByteArray(0)
+    private var gravityDataLSB = ByteArray(0)
+
     private var timeData = ByteArray(0)
 
     private lateinit var sensorManager: SensorManager
@@ -41,11 +51,10 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         binding = ActivityMovementBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.progressBarMovement.max = EnvVariables.DESIRED_LENGTH
+        binding.progressBarMovement.max = desiredLength
 
         initSensors()
         initListeners()
-
     }
 
     private fun initSensors() {
@@ -79,11 +88,12 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
         if (event == null) return
 
-        if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
-//            unregisterListeners()
+        if (smallestArraySize() >= desiredLength) {
+            unregisterListeners()
             saveData()
             resetDataArrays()
             resetUiElements()
+            registerListeners()
 //            return
         }
 
@@ -92,24 +102,69 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun saveData() {
-        val lists = listOf(
-            accelerationData,
-            gyroscopeData,
-            magnetometerData,
-            rotationData,
-            gravityData
+        saveXOR()
+        saveLSB()
+        saveTime()
+        saveEachDataArray()
+    }
+
+    private fun saveEachDataArray() {
+        val list = listOf(
+            Pair("movement_accelerationDataXOR", accelerationDataXOR),
+            Pair("movement_gyroscopeDataXOR", gyroscopeDataXOR),
+            Pair("movement_magnetometerDataXOR", magnetometerDataXOR),
+            Pair("movement_rotationDataXOR", rotationDataXOR),
+            Pair("movement_gravityDataXOR", gravityDataXOR),
+            Pair("movement_accelerationDataLSB", accelerationDataLSB),
+            Pair("movement_gyroscopeDataLSB", gyroscopeDataLSB),
+            Pair("movement_magnetometerDataLSB", magnetometerDataLSB),
+            Pair("movement_rotationDataLSB", rotationDataLSB),
+            Pair("movement_gravityDataLSB", gravityDataLSB)
         )
-        val xor = ByteArrayListXOR.xor(lists)
 
-        val result = ByteArrayToBinaryStringConverter.convert(xor)
-        DataSaver.saveData(
-            data = result,
-            table = "movement_LSB")
+        list.forEach { (table, data) ->
+            DataSaver.saveData(
+                table = table,
+                data = ByteArrayToBinaryStringConverter.convert(data)
+            )
+        }
+    }
 
-        val timeResult = ByteArrayToBinaryStringConverter.convert(timeData)
+    private fun saveTime() {
         DataSaver.saveData(
-            data = timeResult,
-            table = "time_alone")
+            data = ByteArrayToBinaryStringConverter.convert(timeData),
+            table = "time_alone"
+        )
+    }
+
+    private fun saveLSB() {
+        val listOfLSB = listOf(
+            accelerationDataLSB,
+            gyroscopeDataLSB,
+            magnetometerDataLSB,
+            rotationDataLSB,
+            gravityDataLSB
+        )
+        val lsbXOR = ByteArrayListXOR.xor(listOfLSB)
+        DataSaver.saveData(
+            data = ByteArrayToBinaryStringConverter.convert(lsbXOR),
+            table = "movement_LSB"
+        )
+    }
+
+    private fun saveXOR() {
+        val listsOfXOR = listOf(
+            accelerationDataXOR,
+            gyroscopeDataXOR,
+            magnetometerDataXOR,
+            rotationDataXOR,
+            gravityDataXOR
+        )
+        val xor = ByteArrayListXOR.xor(listsOfXOR)
+        DataSaver.saveData(
+            data = ByteArrayToBinaryStringConverter.convert(xor),
+            table = "movement_XOR"
+        )
     }
 
     @SuppressLint("SetTextI18n")
@@ -127,7 +182,8 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun getDataFromEvent(event: SensorEvent) {
-        if (timeData.size < EnvVariables.DESIRED_LENGTH) timeData += LeastSignificantBits.getSystemNanoTime()
+        if (timeData.size < desiredLength) timeData += LeastSignificantBits.getSystemNanoTime()
+
         if (event.sensor.name.lowercase().contains("accelerometer")) accelerometerDataHandler(event)
         if (event.sensor.name.lowercase().contains("rotation vector")) rotationVectorDataHandler(event)
         if (event.sensor.name.lowercase().contains("magnetometer")) magnetometerDataHandler(event)
@@ -136,84 +192,108 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun gravityDataHandler(event: SensorEvent) {
-        if (gravityData.size == EnvVariables.DESIRED_LENGTH) {
+        if (gravityDataXOR.size == desiredLength && gravityDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, gravity)
         } else {
-            val byteArray = getBytes(event)
-            gravityData += byteArray
+            gravityDataXOR += getBytesXORWay(event)
+            gravityDataLSB += getBytesLSBWay(event)
         }
     }
 
     private fun gyroscopeDataHandler(event: SensorEvent) {
-        if (gyroscopeData.size == EnvVariables.DESIRED_LENGTH) {
+        if (gyroscopeDataXOR.size == desiredLength && gyroscopeDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, gyroscope)
         } else {
-            val byteArray = getBytes(event)
-            gyroscopeData += byteArray
+            gyroscopeDataXOR += getBytesXORWay(event)
+            gyroscopeDataLSB += getBytesLSBWay(event)
         }
     }
 
     private fun magnetometerDataHandler(event: SensorEvent) {
-        if (magnetometerData.size == EnvVariables.DESIRED_LENGTH) {
+        if (magnetometerDataXOR.size == desiredLength && magnetometerDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, magnetometer)
         } else {
-            val byteArray = getBytes(event)
-            magnetometerData += byteArray
+            magnetometerDataXOR += getBytesXORWay(event)
+            magnetometerDataLSB += getBytesLSBWay(event)
         }
     }
 
     private fun rotationVectorDataHandler(event: SensorEvent) {
-        if (rotationData.size == EnvVariables.DESIRED_LENGTH) {
+        if (rotationDataXOR.size == desiredLength && rotationDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, rotation)
         } else {
-            val byteArray = getBytes(event)
-            rotationData += byteArray
+            rotationDataXOR += getBytesXORWay(event)
+            rotationDataLSB += getBytesLSBWay(event)
         }
     }
 
     private fun accelerometerDataHandler(event: SensorEvent) {
-        if (accelerationData.size == EnvVariables.DESIRED_LENGTH) {
+        if (accelerationDataXOR.size == desiredLength && accelerationDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, accelerometer)
         } else {
-            val byteArray = getBytes(event)
-            accelerationData += byteArray
+            accelerationDataXOR += getBytesXORWay(event)
+            accelerationDataLSB += getBytesLSBWay(event)
         }
     }
 
     private fun resetDataArrays() {
-        accelerationData = ByteArray(0)
-        gyroscopeData = ByteArray(0)
-        magnetometerData = ByteArray(0)
-        rotationData = ByteArray(0)
-        gravityData = ByteArray(0)
+        accelerationDataXOR = ByteArray(0)
+        gyroscopeDataXOR = ByteArray(0)
+        magnetometerDataXOR = ByteArray(0)
+        rotationDataXOR = ByteArray(0)
+        gravityDataXOR = ByteArray(0)
+
+        accelerationDataLSB = ByteArray(0)
+        gyroscopeDataLSB = ByteArray(0)
+        magnetometerDataLSB = ByteArray(0)
+        rotationDataLSB = ByteArray(0)
+        gravityDataLSB = ByteArray(0)
+
         timeData = ByteArray(0)
-        registerListeners()
     }
 
     private fun smallestArraySize(): Int {
         val arrays = listOf(
-            accelerationData,
-            gyroscopeData,
-            magnetometerData,
-            rotationData,
-            gravityData,
-            timeData
+            accelerationDataXOR,
+            gyroscopeDataXOR,
+            magnetometerDataXOR,
+            rotationDataXOR,
+            gravityDataXOR,
+            timeData,
+            accelerationDataLSB,
+            gyroscopeDataLSB,
+            magnetometerDataLSB,
+            rotationDataLSB,
+            gravityDataLSB
         )
-        return arrays.minBy { it.size }.size ?: 0
+        return arrays.minBy { it.size }.size
     }
 
-    private fun getBytes(event: SensorEvent): ByteArray {
+    private fun getBytesXORWay(event: SensorEvent): ByteArray {
         val values: FloatArray = event.values
-//
-//        val byteList = NumberToByteArrayConverter.convertFloat(values.toList())
-//
-//        return ByteArrayListXOR.xor(byteList)
 
-//        val values: LongArray = event.values.map { it.toLong() }.toLongArray()
+        val byteList: List<ByteArray> = NumberToByteArrayConverter.convertFloat(values.toList())
+        val distilledBytes = distillByteArrays(byteList)
+
+        return ByteArrayListXOR.xor(distilledBytes)
+    }
+
+    fun distillByteArrays(byteArrays: List<ByteArray>): List<ByteArray> {
+        return byteArrays.map { array ->
+            var result = array[0]
+            for (i in 1 until array.size) {
+                result = result xor array[i]
+            }
+            return@map byteArrayOf(result)
+        }
+    }
+
+    private fun getBytesLSBWay(event: SensorEvent): ByteArray {
+        val values: FloatArray = event.values
 
         val average = (values.sum() / values.size)
         val fractional = getFractionalPartAsLong(average.toString())
-        
+
         return LeastSignificantBits.modWithPrimeAndGet8LSB(fractional)
     }
 

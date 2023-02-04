@@ -10,12 +10,4 @@ object NumberToByteArrayConverter {
             buffer.array()
         }
     }
-
-    fun convertLong(list: List<Long>): List<ByteArray> {
-        return list.map { long ->
-            val buffer = ByteBuffer.allocate(8)
-            buffer.putLong(long)
-            buffer.array()
-        }
-    }
 }
