@@ -17,10 +17,10 @@ import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.utilities.ByteArrayListXOR
 import com.example.utilities.DataSaver
 import com.example.utilities.EnvVariables
+import com.example.utilities.LeastSignificantBits
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import kotlin.experimental.and
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
@@ -66,6 +66,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
+        
         val list = listOf(
             cameraData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray(),
             audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
@@ -75,6 +76,16 @@ class CameraActivity : AppCompatActivity() {
         DataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(xor),
             table = "camera"
+        )
+
+        DataSaver.saveData(
+            data = ByteArrayToBinaryStringConverter.convert(cameraData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()),
+            table = "camera_alone"
+        )
+
+        DataSaver.saveData(
+            data = ByteArrayToBinaryStringConverter.convert(audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()),
+            table = "audio_alone"
         )
     }
 
@@ -156,7 +167,7 @@ class CameraActivity : AppCompatActivity() {
             cameraData,
             audioData
         )
-        return arrays.minBy { it.size }.size ?: 0
+        return arrays.minBy { it.size }.size
     }
 
     inner class ImageAnalyzer : ImageAnalysis.Analyzer {
@@ -164,23 +175,17 @@ class CameraActivity : AppCompatActivity() {
         override fun analyze(image: ImageProxy) {
             if (cameraData.size < EnvVariables.DESIRED_LENGTH) {
                 val average = getAverageValueOfTheFrame(image)
+                val imageDataFractional: Long = getFractionalPartAsLong(average)
 
-                val imageDataFractional: Long = average.split(".")[1].toLong()
-                val modData = imageDataFractional % EnvVariables.PRIME_FOR_MOD
-                val dataInBytes = modData.toByte()
-
-                cameraData += byteArrayOf(dataInBytes and 0xff.toByte())
+                cameraData += LeastSignificantBits.modWithPrimeAndGet8LSB(imageDataFractional)
             }
 
             if (audioData.size < EnvVariables.DESIRED_LENGTH) {
-                val audio = AudioDataGenerator(this@CameraActivity).getDecibelLevel()
+                val audio = AudioDataGenerator(this@CameraActivity).getAudioDataAverage()
 
                 if (audio.toString() != "-Infinity") {
-                    val audioFractional = audio.toString().split(".")[1].toLong()
-                    val audioMod = audioFractional % EnvVariables.PRIME_FOR_MOD
-                    val audioInBytes = audioMod.toByte()
-
-                    audioData += byteArrayOf(audioInBytes and 0xff.toByte())
+                    val audioFractional = getFractionalPartAsLong(audio.toString())
+                    audioData += LeastSignificantBits.modWithPrimeAndGet8LSB(audioFractional)
                 }
             }
 
@@ -195,6 +200,8 @@ class CameraActivity : AppCompatActivity() {
 
             image.close()
         }
+
+        private fun getFractionalPartAsLong(data: String) = data.split(".")[1].toLong()
 
         private fun getAverageValueOfTheFrame(image: ImageProxy): String {
             val buffer = image.planes[0].buffer

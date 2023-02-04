@@ -1,11 +1,8 @@
 package com.example.data_generator
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.net.TrafficStats
-import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.utilities.EnvVariables
-import kotlin.experimental.and
+import com.example.utilities.LeastSignificantBits
 
 class NetworkTrafficDataGenerator(private val context: Context) {
     private var previousMobileBytesSent: Long = TrafficStats.getMobileTxBytes()
@@ -47,19 +44,6 @@ class NetworkTrafficDataGenerator(private val context: Context) {
         previousWifiPacketsSent = wifiPacketsSent
         previousWifiPacketsReceived = wifiPacketsReceived
 
-        return convertToByteArray(stringBuilder.toString())
-    }
-
-    private fun convertToByteArray(data: String): ByteArray {
-        if (data.toLong() == 0L) {
-            return ByteArray(0)
-        }
-
-        val dataToFloat = data.toLong()
-        val modData = dataToFloat % EnvVariables.PRIME_FOR_MOD
-
-        val byte = modData.toInt().toByte()
-
-        return byteArrayOf(byte and 0xff.toByte())
+        return LeastSignificantBits.longTypeAsStringDiscardsZeroes(stringBuilder.toString())
     }
 }

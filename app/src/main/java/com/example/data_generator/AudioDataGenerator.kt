@@ -39,7 +39,7 @@ import kotlin.math.pow
 class AudioDataGenerator(private val context: Context) {
     private lateinit var audioRecord: AudioRecord
 
-    fun getDecibelLevel(): Double {
+    fun getAudioDataAverage(): Double {
         val audioSource = MediaRecorder.AudioSource.MIC
         val sampleRate = 44100
         val channelConfig = AudioFormat.CHANNEL_IN_MONO

@@ -13,8 +13,9 @@ import com.example.pseudorandomgenerator.databinding.ActivityMovementBinding
 import com.example.utilities.ByteArrayListXOR
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.utilities.EnvVariables
-import com.example.converters.FloatToByteArrayConverter
+import com.example.converters.NumberToByteArrayConverter
 import com.example.utilities.DataSaver
+import com.example.utilities.LeastSignificantBits
 
 class MovementActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMovementBinding
@@ -24,6 +25,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     private var magnetometerData = ByteArray(0)
     private var rotationData = ByteArray(0)
     private var gravityData = ByteArray(0)
+    private var timeData = ByteArray(0)
 
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
@@ -102,7 +104,12 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         val result = ByteArrayToBinaryStringConverter.convert(xor)
         DataSaver.saveData(
             data = result,
-            table = "movement")
+            table = "movement_LSB")
+
+        val timeResult = ByteArrayToBinaryStringConverter.convert(timeData)
+        DataSaver.saveData(
+            data = timeResult,
+            table = "time_alone")
     }
 
     @SuppressLint("SetTextI18n")
@@ -120,6 +127,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun getDataFromEvent(event: SensorEvent) {
+        if (timeData.size < EnvVariables.DESIRED_LENGTH) timeData += LeastSignificantBits.getSystemNanoTime()
         if (event.sensor.name.lowercase().contains("accelerometer")) accelerometerDataHandler(event)
         if (event.sensor.name.lowercase().contains("rotation vector")) rotationVectorDataHandler(event)
         if (event.sensor.name.lowercase().contains("magnetometer")) magnetometerDataHandler(event)
@@ -178,6 +186,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         magnetometerData = ByteArray(0)
         rotationData = ByteArray(0)
         gravityData = ByteArray(0)
+        timeData = ByteArray(0)
         registerListeners()
     }
 
@@ -187,17 +196,32 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             gyroscopeData,
             magnetometerData,
             rotationData,
-            gravityData
+            gravityData,
+            timeData
         )
         return arrays.minBy { it.size }.size ?: 0
     }
 
     private fun getBytes(event: SensorEvent): ByteArray {
         val values: FloatArray = event.values
+//
+//        val byteList = NumberToByteArrayConverter.convertFloat(values.toList())
+//
+//        return ByteArrayListXOR.xor(byteList)
 
-        val byteList = FloatToByteArrayConverter.convert(values.toList())
+//        val values: LongArray = event.values.map { it.toLong() }.toLongArray()
 
-        return ByteArrayListXOR.xor(byteList)
+        val average = (values.sum() / values.size)
+        val fractional = getFractionalPartAsLong(average.toString())
+        
+        return LeastSignificantBits.modWithPrimeAndGet8LSB(fractional)
+    }
+
+    private fun getFractionalPartAsLong(data: String): Long {
+        if (data.contains("E"))
+            return data.filter { it.isDigit() }.toLong()
+
+        return data.split(".")[1].toLong()
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {

@@ -45,7 +45,7 @@ class TypingActivity : AppCompatActivity() {
                         keystrokeData += s[start + count - 1].toString().toByteArray()
 
                     if (timeData.size < EnvVariables.DESIRED_LENGTH)
-                        timeData += NanoTimeLeastSignificantEight.getTimeInLower8Bits()
+                        timeData += LeastSignificantBits.getSystemNanoTime()
 
                     updateUiElements()
                 }
@@ -65,6 +65,11 @@ class TypingActivity : AppCompatActivity() {
         DataSaver.saveData(
             data = string,
             table = "typing"
+        )
+
+        DataSaver.saveData(
+            data = ByteArrayToBinaryStringConverter.convert(keystrokeData),
+            table = "keystroke_alone"
         )
     }
 
