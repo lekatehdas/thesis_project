@@ -87,7 +87,7 @@ class TypingActivity : AppCompatActivity() {
 
         DataSaver.saveData(
             data = string,
-            table = "typing_automated"
+            table = "typing"
         )
 
         DataSaver.saveData(
