@@ -117,11 +117,11 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
 
     private fun saveXOROld() {
         val listsOfXOR = listOf(
-            accelerationDataXOROldWay,
-            gyroscopeDataXOROldWay,
-            magnetometerDataXOROldWay,
-            rotationDataXOROldWay,
-            gravityDataXOROldWay
+            accelerationDataXOROldWay.slice(0 until desiredLength).toByteArray(),
+            gyroscopeDataXOROldWay.slice(0 until desiredLength).toByteArray(),
+            magnetometerDataXOROldWay.slice(0 until desiredLength).toByteArray(),
+            rotationDataXOROldWay.slice(0 until desiredLength).toByteArray(),
+            gravityDataXOROldWay.slice(0 until desiredLength).toByteArray()
         )
         val xor = ByteArrayListXOR.xor(listsOfXOR)
         DataSaver.saveData(
@@ -217,8 +217,10 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         if (gravityDataXOR.size == desiredLength && gravityDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, gravity)
         } else {
+            if (gravityDataXOROldWay.size < desiredLength)
+                gravityDataXOROldWay += getBytesXOROldWay(event)
+
             gravityDataXOR += getBytesXORWay(event)
-            gravityDataXOROldWay += getBytesXOROldWay(event)
             gravityDataLSB += getBytesLSBWay(event)
         }
     }
@@ -227,8 +229,10 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         if (gyroscopeDataXOR.size == desiredLength && gyroscopeDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, gyroscope)
         } else {
+            if (gyroscopeDataXOROldWay.size < desiredLength)
+                gyroscopeDataXOROldWay += getBytesXOROldWay(event)
+
             gyroscopeDataXOR += getBytesXORWay(event)
-            gyroscopeDataXOROldWay += getBytesXOROldWay(event)
             gyroscopeDataLSB += getBytesLSBWay(event)
         }
     }
@@ -237,8 +241,10 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         if (magnetometerDataXOR.size == desiredLength && magnetometerDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, magnetometer)
         } else {
+            if (magnetometerDataXOROldWay.size < desiredLength)
+                magnetometerDataXOROldWay += getBytesXOROldWay(event)
+
             magnetometerDataXOR += getBytesXORWay(event)
-            magnetometerDataXOROldWay += getBytesXOROldWay(event)
             magnetometerDataLSB += getBytesLSBWay(event)
         }
     }
@@ -247,8 +253,10 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         if (rotationDataXOR.size == desiredLength && rotationDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, rotation)
         } else {
+            if (rotationDataXOROldWay.size < desiredLength)
+                rotationDataXOROldWay += getBytesXOROldWay(event)
+
             rotationDataXOR += getBytesXORWay(event)
-            rotationDataXOROldWay += getBytesXOROldWay(event)
             rotationDataLSB += getBytesLSBWay(event)
         }
     }
@@ -257,8 +265,10 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         if (accelerationDataXOR.size == desiredLength && accelerationDataLSB.size == desiredLength) {
             sensorManager.unregisterListener(this, accelerometer)
         } else {
+            if (accelerationDataXOROldWay.size < desiredLength)
+                accelerationDataXOROldWay += getBytesXOROldWay(event)
+
             accelerationDataXOR += getBytesXORWay(event)
-            accelerationDataXOROldWay += getBytesXOROldWay(event)
             accelerationDataLSB += getBytesLSBWay(event)
         }
     }
