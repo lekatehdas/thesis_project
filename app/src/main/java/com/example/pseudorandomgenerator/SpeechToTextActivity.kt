@@ -14,8 +14,11 @@ import com.example.utilities.ByteArrayProcessor
 
 class SpeechToTextActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySpeechToTextBinding
+
     private lateinit var speechDataGenerator: SpeechDataGenerator
+
     private val processor = ByteArrayProcessor()
+
     private var stringData = ByteArray(0)
     private var audioData = ByteArray(0)
 
@@ -75,9 +78,12 @@ class SpeechToTextActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
+        val audio = audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
+        val text = stringData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
+
         val lists = listOf(
-            audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray(),
-            stringData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
+            audio,
+            text
         )
 
         val xor = ByteArrayListXOR.xor(lists)
@@ -86,6 +92,16 @@ class SpeechToTextActivity : AppCompatActivity() {
         DataSaver.saveData(
             data = result,
             table = "speech"
+        )
+
+        DataSaver.saveData(
+            data = ByteArrayToBinaryStringConverter.convert(text),
+            table = "speech_audio_alone"
+        )
+
+        DataSaver.saveData(
+            data = ByteArrayToBinaryStringConverter.convert(audio),
+            table = "speech_text_alone"
         )
     }
 
