@@ -41,8 +41,6 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     private var rotationDataLSB = ByteArray(0)
     private var gravityDataLSB = ByteArray(0)
 
-    private var timeData = ByteArray(0)
-
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
     private var gyroscope: Sensor? = null
@@ -72,6 +70,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         gravity = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initListeners() {
         binding.btnMovementStart.setOnClickListener {
             binding.btnMovementStart.text = "IN PROGRESS"
@@ -111,7 +110,6 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         saveXOR()
         saveXOROld()
         saveLSB()
-        saveTime()
         saveEachDataArray()
     }
 
@@ -152,13 +150,6 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun saveTime() {
-        DataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(timeData),
-            table = "time_alone"
-        )
-    }
-
     private fun saveLSB() {
         val listOfLSB = listOf(
             accelerationDataLSB,
@@ -197,6 +188,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         binding.txtMovementPercent.text = "${percentage.toInt()}%"
     }
 
+    @SuppressLint("SetTextI18n")
     private fun resetUiElements() {
         binding.btnMovementStart.text = "START"
         binding.txtMovementPercent.text = "0%"
@@ -204,13 +196,11 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun getDataFromEvent(event: SensorEvent) {
-        if (timeData.size < desiredLength) timeData += LeastSignificantBits.getSystemNanoTime()
-
-        if (event.sensor.name.lowercase().contains("accelerometer")) accelerometerDataHandler(event)
-        if (event.sensor.name.lowercase().contains("rotation vector")) rotationVectorDataHandler(event)
-        if (event.sensor.name.lowercase().contains("magnetometer")) magnetometerDataHandler(event)
-        if (event.sensor.name.lowercase().contains("gyroscope")) gyroscopeDataHandler(event)
-        if (event.sensor.name.lowercase().contains("gravity")) gravityDataHandler(event)
+        if (event.sensor == accelerometer) accelerometerDataHandler(event)
+        if (event.sensor == rotation) rotationVectorDataHandler(event)
+        if (event.sensor == magnetometer) magnetometerDataHandler(event)
+        if (event.sensor == gyroscope) gyroscopeDataHandler(event)
+        if (event.sensor == gravity) gravityDataHandler(event)
     }
 
     private fun gravityDataHandler(event: SensorEvent) {
@@ -291,8 +281,6 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         magnetometerDataLSB = ByteArray(0)
         rotationDataLSB = ByteArray(0)
         gravityDataLSB = ByteArray(0)
-
-        timeData = ByteArray(0)
     }
 
     private fun smallestArraySize(): Int {
@@ -302,7 +290,6 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             magnetometerDataXOR,
             rotationDataXOR,
             gravityDataXOR,
-            timeData,
             accelerationDataLSB,
             gyroscopeDataLSB,
             magnetometerDataLSB,

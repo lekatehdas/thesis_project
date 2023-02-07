@@ -14,6 +14,7 @@ import com.example.utilities.ByteArrayProcessor
 
 class SpeechToTextActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySpeechToTextBinding
+    private val desiredLength = EnvVariables.DESIRED_LENGTH * 10
 
     private lateinit var speechDataGenerator: SpeechDataGenerator
 
@@ -29,7 +30,7 @@ class SpeechToTextActivity : AppCompatActivity() {
 
         speechDataGenerator = SpeechDataGenerator(this)
 
-        binding.progressBarSpeech.max = EnvVariables.DESIRED_LENGTH
+        binding.progressBarSpeech.max = desiredLength
 
         binding.btnStartSpeech.setOnClickListener {
             speechDataGenerator.startVoiceRecognition()
@@ -54,13 +55,16 @@ class SpeechToTextActivity : AppCompatActivity() {
             saveData()
             resetData()
             resetUiElements()
+            speechDataGenerator.startVoiceRecognition()
+        } else {
+            speechDataGenerator.startVoiceRecognition()
         }
     }
 
     private fun getAudioData(arrays: List<ByteArray>) {
         var rawAudioData = arrays[1]
 
-        while (rawAudioData.size > EnvVariables.DESIRED_LENGTH) {
+        while (rawAudioData.size > desiredLength * 2) {
             rawAudioData = processor.process(rawAudioData)
         }
 
@@ -70,7 +74,7 @@ class SpeechToTextActivity : AppCompatActivity() {
     private fun getStringData(arrays: List<ByteArray>) {
         var rawStringData = arrays[0]
 
-        while (rawStringData.size > EnvVariables.DESIRED_LENGTH) {
+        while (rawStringData.size > desiredLength * 2) {
             rawStringData = processor.process(rawStringData)
         }
 
@@ -78,8 +82,8 @@ class SpeechToTextActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
-        val audio = audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
-        val text = stringData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
+        val audio = audioData.slice(0 until desiredLength).toByteArray()
+        val text = stringData.slice(0 until desiredLength).toByteArray()
 
         val lists = listOf(
             audio,
@@ -105,9 +109,9 @@ class SpeechToTextActivity : AppCompatActivity() {
         )
     }
 
-    private fun enoughStringData() = stringData.size >= EnvVariables.DESIRED_LENGTH
+    private fun enoughStringData() = stringData.size >= desiredLength
 
-    private fun enoughAudioData() = audioData.size >= EnvVariables.DESIRED_LENGTH
+    private fun enoughAudioData() = audioData.size >= desiredLength
 
     private fun resetData() {
         stringData = ByteArray(0)
@@ -136,6 +140,6 @@ class SpeechToTextActivity : AppCompatActivity() {
     }
 
     private fun enoughData(): Boolean {
-        return smallestArraySize() >= EnvVariables.DESIRED_LENGTH
+        return smallestArraySize() >= desiredLength
     }
 }
