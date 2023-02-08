@@ -6,19 +6,18 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.View
-import android.widget.EditText
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.pseudorandomgenerator.databinding.ActivityTypeingBinding
 import com.example.utilities.*
+import java.math.BigInteger
 import java.security.SecureRandom
-import kotlin.random.Random
 
 class TypingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTypeingBinding
 
     private var keystrokeData = ByteArray(0)
     private var timeData = ByteArray(0)
+
     private var alphabet: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     private var secRandom: SecureRandom = SecureRandom()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,16 +63,24 @@ class TypingActivity : AppCompatActivity() {
                     resetUiElements()
 
                 } else {
-                    if (keystrokeData.size < EnvVariables.DESIRED_LENGTH)
-                        keystrokeData += s[start + count - 1].toString().toByteArray()
+                    val time = LeastSignificantBits.getSystemNanoTime()
+                    if (keystrokeData.size < EnvVariables.DESIRED_LENGTH) {
+                        val char = s[start + count - 1].toString().toByteArray()
+                        keystrokeData += scrambleChar(char, time)
+                    }
 
                     if (timeData.size < EnvVariables.DESIRED_LENGTH)
-                        timeData += LeastSignificantBits.getSystemNanoTime()
+                        timeData += time
 
                     updateUiElements()
                 }
             }
         })
+    }
+
+    private fun scrambleChar(char: ByteArray, time: ByteArray): ByteArray {
+        val result = (EnvVariables.PRIME_FOR_MOD.toBigInteger() + BigInteger(char)) % BigInteger(time)
+        return result.toByteArray()
     }
 
     private fun saveData() {
@@ -92,7 +99,12 @@ class TypingActivity : AppCompatActivity() {
 
         DataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(keystrokeData),
-            table = "keystroke_alone"
+            table = "typing_keystroke_alone"
+        )
+
+        DataSaver.saveData(
+            data = ByteArrayToBinaryStringConverter.convert(timeData),
+            table = "typing_time_alone"
         )
     }
 
@@ -122,6 +134,6 @@ class TypingActivity : AppCompatActivity() {
             keystrokeData,
             timeData
         )
-        return arrays.minBy { it.size }.size ?: 0
+        return arrays.minBy { it.size }.size
     }
 }

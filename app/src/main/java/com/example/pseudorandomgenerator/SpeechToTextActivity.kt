@@ -6,11 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.pseudorandomgenerator.databinding.ActivitySpeechToTextBinding
-import com.example.utilities.DataSaver
-import com.example.utilities.EnvVariables
 import com.example.data_generator.SpeechDataGenerator
-import com.example.utilities.ByteArrayListXOR
-import com.example.utilities.ByteArrayProcessor
+import com.example.utilities.*
 
 class SpeechToTextActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySpeechToTextBinding
