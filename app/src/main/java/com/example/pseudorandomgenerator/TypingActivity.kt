@@ -29,9 +29,9 @@ class TypingActivity : AppCompatActivity() {
         }
 
 
-    private fun runTest(){
+    private fun dataGenerating(){
         for (i in 1..10000){
-            for (i in 1..64){
+            for (j in 1..64){
                 val randChar : String = alphabet[secRandom.nextInt(alphabet.size)].toString()
                 Log.d("Letter", randChar)
                 binding.editTxtTimeTyping.setText(randChar)
@@ -45,10 +45,10 @@ class TypingActivity : AppCompatActivity() {
         binding.btnTypingTest.setOnClickListener()
         {
             Log.d("AUTO_DATA", "AUTO_DATA run start")
-            runTest()
+            dataGenerating()
             Log.d("AUTO_DATA", "AUTO_DATA run end")
         }
-        binding.editTxtTimeTyping.addTextChangedListener(/* watcher = */ object : TextWatcher {
+        binding.editTxtTimeTyping.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -64,6 +64,7 @@ class TypingActivity : AppCompatActivity() {
 
                 } else {
                     val time = LeastSignificantBits.getSystemNanoTime()
+
                     if (keystrokeData.size < EnvVariables.DESIRED_LENGTH) {
                         val char = s[start + count - 1].toString().toByteArray()
                         keystrokeData += scrambleChar(char, time)
@@ -79,7 +80,7 @@ class TypingActivity : AppCompatActivity() {
     }
 
     private fun scrambleChar(char: ByteArray, time: ByteArray): ByteArray {
-        val result = (EnvVariables.PRIME_FOR_MOD.toBigInteger() + BigInteger(char)) % BigInteger(time)
+        val result = (BigInteger(time) + BigInteger(char)) % EnvVariables.PRIME_FOR_MOD.toBigInteger()
         return result.toByteArray()
     }
 
