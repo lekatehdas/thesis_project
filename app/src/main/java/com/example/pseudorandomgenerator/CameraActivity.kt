@@ -85,7 +85,7 @@ class CameraActivity : AppCompatActivity() {
 
         DataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()),
-            table = "audio_alone"
+            table = "camera_audio_alone"
         )
     }
 

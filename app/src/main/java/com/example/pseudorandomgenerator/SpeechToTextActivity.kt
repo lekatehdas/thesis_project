@@ -61,9 +61,10 @@ class SpeechToTextActivity : AppCompatActivity() {
     private fun getAudioData(arrays: List<ByteArray>) {
         var rawAudioData = arrays[1]
 
-        while (rawAudioData.size > desiredLength * 2) {
+        do {
             rawAudioData = processor.process(rawAudioData)
         }
+        while (rawAudioData.size > desiredLength * 2)
 
         audioData += rawAudioData
     }
@@ -71,9 +72,10 @@ class SpeechToTextActivity : AppCompatActivity() {
     private fun getStringData(arrays: List<ByteArray>) {
         var rawStringData = arrays[0]
 
-        while (rawStringData.size > desiredLength * 2) {
+        do {
             rawStringData = processor.process(rawStringData)
         }
+        while (rawStringData.size > desiredLength * 2)
 
         stringData += rawStringData
     }
