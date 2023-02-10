@@ -29,4 +29,8 @@ class DataHolder {
     fun getSizeOfSmallestArray(): Int {
         return if (byteArrays.isEmpty()) { 0 } else { byteArrays.values.minBy { it.size }.size }
     }
+
+    fun getSizeOfAnArray(name: String): Int {
+        return if (byteArrays[name] == null) { 0 } else { byteArrays[name]!!.size }
+    }
 }

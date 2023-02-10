@@ -6,7 +6,7 @@ import android.net.NetworkInfo
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.collectors.NetworkTrafficDataCollector
+import com.example.collectors.NetworkDataCollector
 import com.example.pseudorandomgenerator.databinding.ActivityNetworkBinding
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
@@ -19,7 +19,7 @@ class NetworkActivity : AppCompatActivity() {
     private lateinit var dataHolder: DataHolder
     private val sources = listOf(network)
 
-    private lateinit var collector: NetworkTrafficDataCollector
+    private lateinit var collector: NetworkDataCollector
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +38,7 @@ class NetworkActivity : AppCompatActivity() {
     }
 
     private fun initCollector() {
-        collector = NetworkTrafficDataCollector(
+        collector = NetworkDataCollector(
             dataHolder,
             network,
             ::updateProgressInUi,
