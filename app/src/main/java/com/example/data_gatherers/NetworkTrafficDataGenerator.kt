@@ -1,10 +1,8 @@
 package com.example.data_gatherers
 
-import android.content.Context
 import android.net.TrafficStats
-import com.example.utilities.LeastSignificantBits
 
-class NetworkTrafficDataGenerator(private val context: Context) {
+class NetworkTrafficDataGenerator {
     private var previousMobileBytesSent: Long = TrafficStats.getMobileTxBytes()
     private var previousMobileBytesReceived: Long = TrafficStats.getMobileRxBytes()
     private var previousMobilePacketsSent: Long = TrafficStats.getMobileTxPackets()
@@ -14,7 +12,7 @@ class NetworkTrafficDataGenerator(private val context: Context) {
     private var previousWifiPacketsSent: Long = TrafficStats.getTotalTxPackets() - previousMobilePacketsSent
     private var previousWifiPacketsReceived: Long = TrafficStats.getTotalRxPackets() - previousMobilePacketsReceived
 
-    fun networkTrafficVolume(): ByteArray {
+    fun networkTrafficVolume(): Long {
         val stringBuilder = StringBuilder()
 
         val mobileBytesSent = TrafficStats.getMobileTxBytes()
@@ -40,6 +38,6 @@ class NetworkTrafficDataGenerator(private val context: Context) {
         previousWifiPacketsSent = wifiPacketsSent
         previousWifiPacketsReceived = wifiPacketsReceived
 
-        return LeastSignificantBits.longTypeAsStringDiscardsZeroes(stringBuilder.toString())
+        return stringBuilder.toString().toLong()
     }
 }

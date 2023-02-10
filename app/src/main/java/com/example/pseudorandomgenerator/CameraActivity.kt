@@ -14,10 +14,10 @@ import androidx.core.content.ContextCompat
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.data_gatherers.AudioDataGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
-import com.example.utilities.ByteArrayListXOR
+import com.example.data_processors.ByteArrayListXOR
 import com.example.utilities.FirebaseDataSaver
-import com.example.utilities.EnvVariables
-import com.example.utilities.LeastSignificantBits
+import com.example.utilities.Constants
+import com.example.data_processors.LeastSignificantBits
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -37,7 +37,7 @@ class CameraActivity : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.progressBarCamera.max = EnvVariables.DESIRED_LENGTH
+        binding.progressBarCamera.max = Constants.DESIRED_LENGTH
 
         initListeners()
 
@@ -54,7 +54,7 @@ class CameraActivity : AppCompatActivity() {
                 stopCamera()
                 binding.btnCameraStart.text = "START"
 
-                if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
+                if (smallestArraySize() >= Constants.DESIRED_LENGTH) {
                     saveData()
                     resetData()
                     resetUiElements()
@@ -68,8 +68,8 @@ class CameraActivity : AppCompatActivity() {
     private fun saveData() {
         
         val list = listOf(
-            cameraData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray(),
-            audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
+            cameraData.slice(0 until Constants.DESIRED_LENGTH).toByteArray(),
+            audioData.slice(0 until Constants.DESIRED_LENGTH).toByteArray()
         )
         val xor = ByteArrayListXOR.combineByteArraysThroughXOR(list)
 
@@ -79,12 +79,12 @@ class CameraActivity : AppCompatActivity() {
         )
 
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(cameraData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()),
+            data = ByteArrayToBinaryStringConverter.convert(cameraData.slice(0 until Constants.DESIRED_LENGTH).toByteArray()),
             table = "camera_alone"
         )
 
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()),
+            data = ByteArrayToBinaryStringConverter.convert(audioData.slice(0 until Constants.DESIRED_LENGTH).toByteArray()),
             table = "camera_audio_alone"
         )
     }
@@ -173,14 +173,14 @@ class CameraActivity : AppCompatActivity() {
     inner class ImageAnalyzer : ImageAnalysis.Analyzer {
         @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
         override fun analyze(image: ImageProxy) {
-            if (cameraData.size < EnvVariables.DESIRED_LENGTH) {
+            if (cameraData.size < Constants.DESIRED_LENGTH) {
                 val average = getAverageValueOfTheFrame(image)
                 val imageDataFractional: Long = getFractionalPartAsLong(average)
 
                 cameraData += LeastSignificantBits.modWithPrimeAndGet8LSB(imageDataFractional)
             }
 
-            if (audioData.size < EnvVariables.DESIRED_LENGTH) {
+            if (audioData.size < Constants.DESIRED_LENGTH) {
                 val audio = AudioDataGenerator(this@CameraActivity).getAudioDataAverage()
 
                 if (audio.toString() != "-Infinity") {
@@ -190,7 +190,7 @@ class CameraActivity : AppCompatActivity() {
             }
 
             runOnUiThread {
-                if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
+                if (smallestArraySize() >= Constants.DESIRED_LENGTH) {
                     saveData()
                     resetData()
                     resetUiElements()

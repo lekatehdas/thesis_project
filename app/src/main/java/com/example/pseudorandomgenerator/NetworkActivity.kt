@@ -12,7 +12,8 @@ import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.data_gatherers.NetworkTrafficDataGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityNetworkBinding
 import com.example.utilities.FirebaseDataSaver
-import com.example.utilities.EnvVariables
+import com.example.utilities.Constants
+import com.example.data_processors.LeastSignificantBits
 import kotlinx.coroutines.*
 
 class NetworkActivity : AppCompatActivity() {
@@ -28,7 +29,7 @@ class NetworkActivity : AppCompatActivity() {
         binding = ActivityNetworkBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.progressBarNetwork.max = EnvVariables.DESIRED_LENGTH
+        binding.progressBarNetwork.max = Constants.DESIRED_LENGTH
 
         initListeners()
     }
@@ -53,15 +54,17 @@ class NetworkActivity : AppCompatActivity() {
             return
         }
 
-        val generator = NetworkTrafficDataGenerator(this)
+        val generator = NetworkTrafficDataGenerator()
 
         job = CoroutineScope(Job()).launch {
             while (true) {
 
-                while (isActive && smallestArraySize() < EnvVariables.DESIRED_LENGTH) {
+                while (isActive && smallestArraySize() < Constants.DESIRED_LENGTH) {
 
                     try {
-                        networkData += generator.networkTrafficVolume()
+                        val volume = generator.networkTrafficVolume()
+                        networkData += LeastSignificantBits.modWithPrimeAndGet8LSB(volume)
+
                         runOnUiThread { updateProgressInUi() }
                         delay(500)
 
@@ -70,7 +73,7 @@ class NetworkActivity : AppCompatActivity() {
                     }
                 }
 
-                if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
+                if (smallestArraySize() >= Constants.DESIRED_LENGTH) {
                     saveData()
                     resetData()
                     runOnUiThread { resetUiElements() }
@@ -87,7 +90,7 @@ class NetworkActivity : AppCompatActivity() {
 
 
     private fun saveData() {
-        val result = networkData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
+        val result = networkData.slice(0 until Constants.DESIRED_LENGTH).toByteArray()
         val string = ByteArrayToBinaryStringConverter.convert(result)
 
         FirebaseDataSaver.saveData(

@@ -12,13 +12,15 @@ import android.os.Bundle
 import com.example.pseudorandomgenerator.databinding.ActivityMovementBinding
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.converters.NumberToByteArrayConverter
+import com.example.data_processors.ByteArrayListXOR
+import com.example.data_processors.LeastSignificantBits
 import com.example.utilities.*
 import kotlin.experimental.xor
 
 class MovementActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMovementBinding
 
-    private val desiredLength = EnvVariables.DESIRED_LENGTH
+    private val desiredLength = Constants.DESIRED_LENGTH
 
     private var accelerationDataXOR = ByteArray(0)
     private var gyroscopeDataXOR = ByteArray(0)

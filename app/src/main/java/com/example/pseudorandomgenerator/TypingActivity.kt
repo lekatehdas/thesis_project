@@ -7,6 +7,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import com.example.converters.ByteArrayToBinaryStringConverter
+import com.example.data_processors.ByteArrayListXOR
+import com.example.data_processors.LeastSignificantBits
 import com.example.pseudorandomgenerator.databinding.ActivityTypeingBinding
 import com.example.utilities.*
 import java.math.BigInteger
@@ -24,7 +26,7 @@ class TypingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTypeingBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.progressBarTimeTyping.max = EnvVariables.DESIRED_LENGTH
+        binding.progressBarTimeTyping.max = Constants.DESIRED_LENGTH
         initListeners()
         }
 
@@ -57,7 +59,7 @@ class TypingActivity : AppCompatActivity() {
                     return
                 }
 
-                if (smallestArraySize() >= EnvVariables.DESIRED_LENGTH) {
+                if (smallestArraySize() >= Constants.DESIRED_LENGTH) {
                     saveData()
                     resetData()
                     resetUiElements()
@@ -65,12 +67,12 @@ class TypingActivity : AppCompatActivity() {
                 } else {
                     val time = LeastSignificantBits.getSystemNanoTime()
 
-                    if (keystrokeData.size < EnvVariables.DESIRED_LENGTH) {
+                    if (keystrokeData.size < Constants.DESIRED_LENGTH) {
                         val char = s[start + count - 1].toString().toByteArray()
                         keystrokeData += scrambleChar(char, time)
                     }
 
-                    if (timeData.size < EnvVariables.DESIRED_LENGTH)
+                    if (timeData.size < Constants.DESIRED_LENGTH)
                         timeData += time
 
                     updateUiElements()
@@ -80,7 +82,7 @@ class TypingActivity : AppCompatActivity() {
     }
 
     private fun scrambleChar(char: ByteArray, time: ByteArray): ByteArray {
-        val result = (BigInteger(time) + BigInteger(char)) % EnvVariables.PRIME_FOR_MOD.toBigInteger()
+        val result = (BigInteger(time) + BigInteger(char)) % Constants.PRIME_FOR_MOD.toBigInteger()
         return result.toByteArray()
     }
 

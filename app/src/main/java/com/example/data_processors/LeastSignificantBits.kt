@@ -1,5 +1,6 @@
-package com.example.utilities
+package com.example.data_processors
 
+import com.example.utilities.Constants
 import kotlin.experimental.and
 
 object LeastSignificantBits {
@@ -18,7 +19,7 @@ object LeastSignificantBits {
     }
 
     fun modWithPrimeAndGet8LSB(dataInLong: Long): ByteArray {
-        val modData = dataInLong % EnvVariables.PRIME_FOR_MOD
+        val modData = dataInLong % Constants.PRIME_FOR_MOD
 
         val dataInBytes = modData.toByte()
 

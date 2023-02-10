@@ -7,12 +7,13 @@ import android.os.Bundle
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.pseudorandomgenerator.databinding.ActivitySpeechToTextBinding
 import com.example.data_gatherers.SpeechDataGenerator
+import com.example.data_processors.ByteArrayListXOR
 import com.example.data_processors.ByteArrayProcessor
 import com.example.utilities.*
 
 class SpeechToTextActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySpeechToTextBinding
-    private val desiredLength = EnvVariables.DESIRED_LENGTH * 10
+    private val desiredLength = Constants.DESIRED_LENGTH * 10
 
     private lateinit var speechDataGenerator: SpeechDataGenerator
 
