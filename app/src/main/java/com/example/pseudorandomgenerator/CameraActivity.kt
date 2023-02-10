@@ -12,10 +12,10 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.data_generator.AudioDataGenerator
+import com.example.data_gatherers.AudioDataGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.utilities.ByteArrayListXOR
-import com.example.utilities.DataSaver
+import com.example.utilities.FirebaseDataSaver
 import com.example.utilities.EnvVariables
 import com.example.utilities.LeastSignificantBits
 import java.nio.ByteBuffer
@@ -71,19 +71,19 @@ class CameraActivity : AppCompatActivity() {
             cameraData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray(),
             audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
         )
-        val xor = ByteArrayListXOR.xor(list)
+        val xor = ByteArrayListXOR.combineByteArraysThroughXOR(list)
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(xor),
             table = "camera"
         )
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(cameraData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()),
             table = "camera_alone"
         )
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(audioData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()),
             table = "camera_audio_alone"
         )

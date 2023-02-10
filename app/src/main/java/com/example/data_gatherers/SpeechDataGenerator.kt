@@ -1,4 +1,4 @@
-package com.example.data_generator
+package com.example.data_gatherers
 
 import android.annotation.SuppressLint
 import android.app.Activity

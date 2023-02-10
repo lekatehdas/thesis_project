@@ -90,20 +90,20 @@ class TypingActivity : AppCompatActivity() {
             keystrokeData
         )
 
-        val result = ByteArrayListXOR.xor(lists)
+        val result = ByteArrayListXOR.combineByteArraysThroughXOR(lists)
         val string = ByteArrayToBinaryStringConverter.convert(result)
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = string,
             table = "typing"
         )
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(keystrokeData),
             table = "typing_keystroke_alone"
         )
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(timeData),
             table = "typing_time_alone"
         )

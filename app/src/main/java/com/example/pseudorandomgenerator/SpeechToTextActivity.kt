@@ -6,7 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.pseudorandomgenerator.databinding.ActivitySpeechToTextBinding
-import com.example.data_generator.SpeechDataGenerator
+import com.example.data_gatherers.SpeechDataGenerator
+import com.example.data_processors.ByteArrayProcessor
 import com.example.utilities.*
 
 class SpeechToTextActivity : AppCompatActivity() {
@@ -62,7 +63,7 @@ class SpeechToTextActivity : AppCompatActivity() {
         var rawAudioData = arrays[1]
 
         do {
-            rawAudioData = processor.process(rawAudioData)
+            rawAudioData = processor.combineAndReduceByteArray(rawAudioData)
         }
         while (rawAudioData.size > desiredLength * 2)
 
@@ -73,7 +74,7 @@ class SpeechToTextActivity : AppCompatActivity() {
         var rawStringData = arrays[0]
 
         do {
-            rawStringData = processor.process(rawStringData)
+            rawStringData = processor.combineAndReduceByteArray(rawStringData)
         }
         while (rawStringData.size > desiredLength * 2)
 
@@ -89,20 +90,20 @@ class SpeechToTextActivity : AppCompatActivity() {
             text
         )
 
-        val xor = ByteArrayListXOR.xor(lists)
+        val xor = ByteArrayListXOR.combineByteArraysThroughXOR(lists)
         val result = ByteArrayToBinaryStringConverter.convert(xor)
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = result,
             table = "speech"
         )
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(text),
             table = "speech_audio_alone"
         )
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(audio),
             table = "speech_text_alone"
         )

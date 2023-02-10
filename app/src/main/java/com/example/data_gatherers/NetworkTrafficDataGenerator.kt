@@ -1,4 +1,4 @@
-package com.example.data_generator
+package com.example.data_gatherers
 
 import android.content.Context
 import android.net.TrafficStats
@@ -9,14 +9,10 @@ class NetworkTrafficDataGenerator(private val context: Context) {
     private var previousMobileBytesReceived: Long = TrafficStats.getMobileRxBytes()
     private var previousMobilePacketsSent: Long = TrafficStats.getMobileTxPackets()
     private var previousMobilePacketsReceived: Long = TrafficStats.getMobileRxPackets()
-    private var previousWifiBytesSent: Long =
-        TrafficStats.getTotalTxBytes() - previousMobileBytesSent
-    private var previousWifiBytesReceived: Long =
-        TrafficStats.getTotalRxBytes() - previousMobileBytesReceived
-    private var previousWifiPacketsSent: Long =
-        TrafficStats.getTotalTxPackets() - previousMobilePacketsSent
-    private var previousWifiPacketsReceived: Long =
-        TrafficStats.getTotalRxPackets() - previousMobilePacketsReceived
+    private var previousWifiBytesSent: Long = TrafficStats.getTotalTxBytes() - previousMobileBytesSent
+    private var previousWifiBytesReceived: Long = TrafficStats.getTotalRxBytes() - previousMobileBytesReceived
+    private var previousWifiPacketsSent: Long = TrafficStats.getTotalTxPackets() - previousMobilePacketsSent
+    private var previousWifiPacketsReceived: Long = TrafficStats.getTotalRxPackets() - previousMobilePacketsReceived
 
     fun networkTrafficVolume(): ByteArray {
         val stringBuilder = StringBuilder()

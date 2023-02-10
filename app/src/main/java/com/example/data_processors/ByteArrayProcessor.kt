@@ -1,9 +1,9 @@
-package com.example.utilities
+package com.example.data_processors
 
 import kotlin.experimental.xor
 
 class ByteArrayProcessor {
-    fun process(input: ByteArray): ByteArray {
+    fun combineAndReduceByteArray(input: ByteArray): ByteArray {
         var byteArray = input
         if (byteArray.size % 2 != 0) {
             byteArray = byteArray.copyOfRange(1, byteArray.size)

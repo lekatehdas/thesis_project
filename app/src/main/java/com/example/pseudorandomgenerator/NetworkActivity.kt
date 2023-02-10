@@ -9,10 +9,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.data_generator.NetworkTrafficDataGenerator
+import com.example.data_gatherers.NetworkTrafficDataGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityNetworkBinding
-import com.example.utilities.ByteArrayListXOR
-import com.example.utilities.DataSaver
+import com.example.utilities.FirebaseDataSaver
 import com.example.utilities.EnvVariables
 import kotlinx.coroutines.*
 
@@ -88,13 +87,10 @@ class NetworkActivity : AppCompatActivity() {
 
 
     private fun saveData() {
-        val list = listOf(
-            networkData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray(),
-        )
-        val result = ByteArrayListXOR.xor(list)
+        val result = networkData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
         val string = ByteArrayToBinaryStringConverter.convert(result)
 
-        DataSaver.saveData(
+        FirebaseDataSaver.saveData(
             data = string,
             table = "network"
         )
@@ -103,6 +99,13 @@ class NetworkActivity : AppCompatActivity() {
     private fun resetData() {
         networkData = ByteArray(0)
 //        isDataGenerating = false
+    }
+
+    private fun smallestArraySize(): Int {
+        val arrays = listOf(
+            networkData
+        )
+        return arrays.minBy { it.size }.size
     }
 
     @SuppressLint("SetTextI18n")
@@ -120,12 +123,5 @@ class NetworkActivity : AppCompatActivity() {
         val percentage =
             (binding.progressBarNetwork.progress.toFloat() / binding.progressBarNetwork.max.toFloat()) * 100
         binding.txtNetworkPercent.text = "${percentage.toInt()}%"
-    }
-
-    private fun smallestArraySize(): Int {
-        val arrays = listOf(
-            networkData
-        )
-        return arrays.minBy { it.size }.size
     }
 }
