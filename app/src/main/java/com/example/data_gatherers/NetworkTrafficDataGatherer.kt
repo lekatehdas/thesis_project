@@ -2,7 +2,7 @@ package com.example.data_gatherers
 
 import android.net.TrafficStats
 
-class NetworkTrafficDataGenerator {
+class NetworkTrafficDataGatherer {
     private var previousMobileBytesSent: Long = TrafficStats.getMobileTxBytes()
     private var previousMobileBytesReceived: Long = TrafficStats.getMobileRxBytes()
     private var previousMobilePacketsSent: Long = TrafficStats.getMobileTxPackets()

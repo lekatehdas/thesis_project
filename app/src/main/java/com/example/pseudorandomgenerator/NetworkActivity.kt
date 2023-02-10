@@ -9,17 +9,21 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.data_gatherers.NetworkTrafficDataGenerator
+import com.example.data_gatherers.NetworkTrafficDataGatherer
+import com.example.data_processors.ByteArrayListXOR
 import com.example.pseudorandomgenerator.databinding.ActivityNetworkBinding
 import com.example.utilities.FirebaseDataSaver
 import com.example.utilities.Constants
 import com.example.data_processors.LeastSignificantBits
+import com.example.utilities.DataHolder
 import kotlinx.coroutines.*
 
 class NetworkActivity : AppCompatActivity() {
     private lateinit var binding: ActivityNetworkBinding
+    private val network = "networkData"
 
-    private var networkData = ByteArray(0)
+    private lateinit var dataHolder: DataHolder
+    private val sources = listOf(network)
 
     private var isDataGenerating = false
     private var job: Job? = null
@@ -29,9 +33,20 @@ class NetworkActivity : AppCompatActivity() {
         binding = ActivityNetworkBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.progressBarNetwork.max = Constants.DESIRED_LENGTH
+        if (!hasInternetConnection()) {
+            Toast.makeText(this, "No internet available", Toast.LENGTH_SHORT).show()
+            this.finish()
+        }
 
+        binding.progressBarNetwork.max = Constants.DESIRED_LENGTH
+        initDataHolder()
         initListeners()
+    }
+
+    private fun initDataHolder() {
+        dataHolder = DataHolder()
+        for (name in sources)
+            dataHolder.initializeArray(name)
     }
 
     @SuppressLint("SetTextI18n")
@@ -42,43 +57,35 @@ class NetworkActivity : AppCompatActivity() {
                 job?.cancel()
                 runOnUiThread { updateProgressInUi() }
             } else {
-                generateDataWithNetworkTraffic()
+                startMethod()
                 isDataGenerating = true
             }
         }
     }
 
-    private fun generateDataWithNetworkTraffic() {
-        if (!hasInternetConnection()) {
-            Toast.makeText(this, "No internet available", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val generator = NetworkTrafficDataGenerator()
+    private fun startMethod() {
+        val gatherer = NetworkTrafficDataGatherer()
 
         job = CoroutineScope(Job()).launch {
-            while (true) {
+            while (isActive && dataHolder.getSizeOfSmallestArray() < Constants.DESIRED_LENGTH) {
 
-                while (isActive && smallestArraySize() < Constants.DESIRED_LENGTH) {
+                try {
+                    val volume = gatherer.networkTrafficVolume()
+                    val data = LeastSignificantBits.discardZerosGet8LSB(volume)
 
-                    try {
-                        val volume = generator.networkTrafficVolume()
-                        networkData += LeastSignificantBits.modWithPrimeAndGet8LSB(volume)
+                    dataHolder.concatArray(network, data)
 
-                        runOnUiThread { updateProgressInUi() }
-                        delay(500)
+                    runOnUiThread { updateProgressInUi() }
+                    delay(500)
 
-                    } catch (ex: Exception) {
-                        Log.d(TAG, ex.message.toString())
-                    }
-                }
-
-                if (smallestArraySize() >= Constants.DESIRED_LENGTH) {
-                    saveData()
-                    resetData()
-                    runOnUiThread { resetUiElements() }
+                } catch (ex: Exception) {
+                    Log.d(TAG, ex.message.toString())
                 }
             }
+
+            saveData()
+            resetData()
+            runOnUiThread { resetUiElements() }
         }
     }
 
@@ -90,7 +97,8 @@ class NetworkActivity : AppCompatActivity() {
 
 
     private fun saveData() {
-        val result = networkData.slice(0 until Constants.DESIRED_LENGTH).toByteArray()
+        val results = dataHolder.getAllArrays()
+        val result = ByteArrayListXOR.combineByteArraysThroughXOR(results)
         val string = ByteArrayToBinaryStringConverter.convert(result)
 
         FirebaseDataSaver.saveData(
@@ -100,15 +108,8 @@ class NetworkActivity : AppCompatActivity() {
     }
 
     private fun resetData() {
-        networkData = ByteArray(0)
-//        isDataGenerating = false
-    }
-
-    private fun smallestArraySize(): Int {
-        val arrays = listOf(
-            networkData
-        )
-        return arrays.minBy { it.size }.size
+        dataHolder.resetData()
+        isDataGenerating = false
     }
 
     @SuppressLint("SetTextI18n")
@@ -120,11 +121,12 @@ class NetworkActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateProgressInUi() {
-        binding.progressBarNetwork.progress = smallestArraySize()
+        binding.progressBarNetwork.progress = dataHolder.getSizeOfSmallestArray()
         binding.btnNetworkStart.text = if (isDataGenerating) "PAUSE" else "START"
 
-        val percentage =
-            (binding.progressBarNetwork.progress.toFloat() / binding.progressBarNetwork.max.toFloat()) * 100
+        val percentage = (
+                binding.progressBarNetwork.progress.toFloat() /
+                        binding.progressBarNetwork.max.toFloat()) * 100
         binding.txtNetworkPercent.text = "${percentage.toInt()}%"
     }
 }

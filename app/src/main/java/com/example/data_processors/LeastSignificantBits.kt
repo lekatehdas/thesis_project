@@ -9,7 +9,7 @@ object LeastSignificantBits {
         return modWithPrimeAndGet8LSB(timeInLong)
     }
 
-    fun longTypeAsStringDiscardsZeroes(data: String): ByteArray {
+    fun discardZerosGet8LSB(data: Long): ByteArray {
         if (data.toLong() == 0L) {
             return ByteArray(0)
         }
