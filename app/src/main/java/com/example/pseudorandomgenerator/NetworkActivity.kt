@@ -7,11 +7,9 @@ import android.net.NetworkInfo
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.data_generator.NetworkTrafficDataGenerator
-import com.example.data_generator.WifiInformationDataGenerator
 import com.example.pseudorandomgenerator.databinding.ActivityNetworkBinding
 import com.example.utilities.ByteArrayListXOR
 import com.example.utilities.DataSaver
@@ -22,7 +20,6 @@ class NetworkActivity : AppCompatActivity() {
     private lateinit var binding: ActivityNetworkBinding
 
     private var networkData = ByteArray(0)
-//    private var wifiData = ByteArray(0)
 
     private var isDataGenerating = false
     private var job: Job? = null
@@ -37,17 +34,9 @@ class NetworkActivity : AppCompatActivity() {
         initListeners()
     }
 
-//    private fun wifiPart() {
-//        val wifiDataGenerator = WifiInformationDataGenerator(this)
-//        wifiData = wifiDataGenerator.getWifiInformationData()
-//
-//        if (wifiData.size < EnvVariables.DESIRED_LENGTH) notEnoughScanData("Wifi")
-//    }
-
     @SuppressLint("SetTextI18n")
     private fun initListeners() {
         binding.btnNetworkStart.setOnClickListener {
-//            wifiPart()
             if (isDataGenerating) {
                 isDataGenerating = false
                 job?.cancel()
@@ -101,7 +90,6 @@ class NetworkActivity : AppCompatActivity() {
     private fun saveData() {
         val list = listOf(
             networkData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray(),
-//            wifiData.slice(0 until EnvVariables.DESIRED_LENGTH).toByteArray()
         )
         val result = ByteArrayListXOR.xor(list)
         val string = ByteArrayToBinaryStringConverter.convert(result)
@@ -114,7 +102,6 @@ class NetworkActivity : AppCompatActivity() {
 
     private fun resetData() {
         networkData = ByteArray(0)
-//        wifiData = ByteArray(0)
 //        isDataGenerating = false
     }
 
@@ -137,24 +124,8 @@ class NetworkActivity : AppCompatActivity() {
 
     private fun smallestArraySize(): Int {
         val arrays = listOf(
-//            wifiData,
             networkData
         )
         return arrays.minBy { it.size }.size
-    }
-
-    private fun notEnoughScanData(device: String) {
-        val builder = AlertDialog.Builder(this)
-        builder
-            .setMessage(
-                """
-                    Not enough data to generate key.
-                    Refresh the $device search and try again.
-                    If problem persists, try in the area with multiple wifi connection points.
-                """.trimIndent()
-            )
-            .setPositiveButton("OK") { _, _ -> finish() }
-
-        builder.create().show()
     }
 }
