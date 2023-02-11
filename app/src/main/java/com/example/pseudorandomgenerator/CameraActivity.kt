@@ -12,7 +12,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.data_gatherers.AudioDataGenerator
+import com.example.data_gatherers.AudioDataGatherer
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.data_processors.ByteArrayListXOR
 import com.example.utilities.FirebaseDataSaver
@@ -181,7 +181,7 @@ class CameraActivity : AppCompatActivity() {
             }
 
             if (audioData.size < Constants.DESIRED_LENGTH) {
-                val audio = AudioDataGenerator(this@CameraActivity).getAudioDataAverage()
+                val audio = AudioDataGatherer(this@CameraActivity).getAudioDataAverage()
 
                 if (audio.toString() != "-Infinity") {
                     val audioFractional = getFractionalPartAsLong(audio.toString())

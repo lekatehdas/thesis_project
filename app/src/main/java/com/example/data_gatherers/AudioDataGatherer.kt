@@ -36,7 +36,7 @@ import androidx.core.app.ActivityCompat
 import com.example.utilities.PermissionHelper
 import kotlin.math.pow
 
-class AudioDataGenerator(private val context: Context) {
+class AudioDataGatherer(private val context: Context) {
     private lateinit var audioRecord: AudioRecord
 
     fun getAudioDataAverage(): Double {

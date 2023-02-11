@@ -11,7 +11,7 @@ import com.example.utilities.FirebaseDataSaver
 import kotlinx.coroutines.*
 import kotlin.reflect.KSuspendFunction0
 
-class NetworkDataCollector(
+class NetworkActivityCollector(
     private val dataHolder: DataHolder,
     private val network: String,
     private val updateProgress: KSuspendFunction0<Unit>,

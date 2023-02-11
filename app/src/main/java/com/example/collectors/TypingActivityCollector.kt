@@ -11,7 +11,7 @@ import com.example.utilities.DataHolder
 import com.example.utilities.FirebaseDataSaver
 import java.math.BigInteger
 
-class TypingDataCollector(
+class TypingActivityCollector(
     private val dataHolder: DataHolder,
     private val sources: List<String>,
     private val updateUi: () -> Unit,
