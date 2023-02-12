@@ -4,11 +4,6 @@ import com.example.utilities.Constants
 import kotlin.experimental.and
 
 object LeastSignificantBits {
-    fun getSystemNanoTime(): ByteArray {
-        val timeInLong = System.nanoTime()
-        return modWithPrimeAndGet8LSB(timeInLong)
-    }
-
     fun discardZerosGet8LSB(data: Long): ByteArray {
         if (data.toLong() == 0L) {
             return ByteArray(0)

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
 import android.speech.RecognizerIntent
 import java.io.InputStream
 
@@ -20,6 +21,12 @@ class SpeechDataGenerator(private val context: Context) {
         intent.putExtra("android.speech.extra.GET_AUDIO", true);
 
         (context as Activity).startActivityForResult(intent, REQUEST_CODE)
+
+        // USED FOR DATA GENERATING
+        Handler().postDelayed({
+            context.setResult(Activity.RESULT_CANCELED)
+            context.finishActivity(REQUEST_CODE)
+        }, 10000) // 10 seconds delay
     }
 
     @SuppressLint("Recycle")
