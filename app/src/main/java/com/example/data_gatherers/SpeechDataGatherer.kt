@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.CountDownTimer
 import android.os.Handler
 import android.speech.RecognizerIntent
 import java.io.InputStream
@@ -11,7 +12,13 @@ import java.io.InputStream
 
 class SpeechDataGatherer(private val context: Context) {
     private val REQUEST_CODE = 100
-
+    private val timer = object : CountDownTimer(20000, 1000) {
+        override fun onTick(millisUntilFinished: Long) {}
+        override fun onFinish() {
+            (context as Activity).setResult(Activity.RESULT_CANCELED)
+            context.finishActivity(REQUEST_CODE)
+        }
+    }
     fun startVoiceRecognition() {
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
@@ -23,14 +30,12 @@ class SpeechDataGatherer(private val context: Context) {
         (context as Activity).startActivityForResult(intent, REQUEST_CODE)
 
         // USED FOR DATA GENERATING
-        Handler().postDelayed({
-            context.setResult(Activity.RESULT_CANCELED)
-            context.finishActivity(REQUEST_CODE)
-        }, 10000) // 10 seconds delay
+        timer.start()
     }
 
     @SuppressLint("Recycle")
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): List<ByteArray> {
+        timer.cancel()
         if (!activitySuccessful(requestCode, resultCode)) {
             return listOf(ByteArray(0), ByteArray(0))
         }
