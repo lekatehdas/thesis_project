@@ -6,45 +6,62 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.pseudorandomgenerator.databinding.ActivitySpeechToTextBinding
-import com.example.data_gatherers.SpeechDataGenerator
+import com.example.data_gatherers.SpeechDataGatherer
 import com.example.data_processors.ByteArrayListXOR
 import com.example.data_processors.ByteArrayProcessor
 import com.example.utilities.*
 
 class SpeechToTextActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySpeechToTextBinding
+    private lateinit var dataHolder: DataHolder
+
     private val desiredLength = Constants.DESIRED_LENGTH * 10
 
-    private lateinit var speechDataGenerator: SpeechDataGenerator
+    private lateinit var gatherer: SpeechDataGatherer
 
     private val processor = ByteArrayProcessor()
 
-    private var stringData = ByteArray(0)
-    private var audioData = ByteArray(0)
+    private val speech = "speechData"
+    private val audio = "audioData"
+    private val sources = listOf(
+        speech,
+        audio
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySpeechToTextBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        speechDataGenerator = SpeechDataGenerator(this)
+        gatherer = SpeechDataGatherer(this)
 
         binding.progressBarSpeech.max = desiredLength
 
+        initDataHolder()
+        initListener()
+    }
+
+    private fun initListener() {
         binding.btnStartSpeech.setOnClickListener {
-            speechDataGenerator.startVoiceRecognition()
+            gatherer.startVoiceRecognition()
         }
+    }
+
+    private fun initDataHolder() {
+        dataHolder = DataHolder()
+        for (name in sources)
+            dataHolder.initializeArray(name)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val listOfData: List<ByteArray> =  speechDataGenerator.onActivityResult(requestCode, resultCode, data)
+        val listOfData: List<ByteArray> =  gatherer.onActivityResult(requestCode, resultCode, data)
 
-        if (!enoughStringData()) {
+        if (!enoughDataFor(speech)) {
             getStringData(listOfData)
         }
 
-        if (!enoughAudioData()) {
+        if (!enoughDataFor(audio)) {
             getAudioData(listOfData)
         }
 
@@ -54,42 +71,31 @@ class SpeechToTextActivity : AppCompatActivity() {
             saveData()
             resetData()
             resetUiElements()
-            speechDataGenerator.startVoiceRecognition()
-        } else {
-            speechDataGenerator.startVoiceRecognition()
         }
+
+        gatherer.startVoiceRecognition()
     }
 
     private fun getAudioData(arrays: List<ByteArray>) {
         var rawAudioData = arrays[1]
 
-        do {
-            rawAudioData = processor.combineAndReduceByteArray(rawAudioData)
-        }
+        do { rawAudioData = processor.combineAndReduceByteArray(rawAudioData) }
         while (rawAudioData.size > desiredLength * 2)
 
-        audioData += rawAudioData
+        dataHolder.concatArray(audio, rawAudioData)
     }
 
     private fun getStringData(arrays: List<ByteArray>) {
         var rawStringData = arrays[0]
 
-        do {
-            rawStringData = processor.combineAndReduceByteArray(rawStringData)
-        }
+        do { rawStringData = processor.combineAndReduceByteArray(rawStringData) }
         while (rawStringData.size > desiredLength * 2)
 
-        stringData += rawStringData
+        dataHolder.concatArray(speech, rawStringData)
     }
 
     private fun saveData() {
-        val audio = audioData.slice(0 until desiredLength).toByteArray()
-        val text = stringData.slice(0 until desiredLength).toByteArray()
-
-        val lists = listOf(
-            audio,
-            text
-        )
+        val lists = dataHolder.getAllArrays()
 
         val xor = ByteArrayListXOR.combineByteArraysThroughXOR(lists)
         val result = ByteArrayToBinaryStringConverter.convert(xor)
@@ -100,23 +106,20 @@ class SpeechToTextActivity : AppCompatActivity() {
         )
 
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(text),
+            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(audio)),
             table = "speech_audio_alone"
         )
 
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(audio),
+            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(speech)),
             table = "speech_text_alone"
         )
     }
 
-    private fun enoughStringData() = stringData.size >= desiredLength
-
-    private fun enoughAudioData() = audioData.size >= desiredLength
+    private fun enoughDataFor(name: String) = dataHolder.getSizeOfAnArray(name) >= desiredLength
 
     private fun resetData() {
-        stringData = ByteArray(0)
-        audioData = ByteArray(0)
+        dataHolder.resetData()
     }
 
     private fun resetUiElements() {
@@ -126,21 +129,14 @@ class SpeechToTextActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateUiElements() {
-        binding.progressBarSpeech.progress = smallestArraySize()
+        binding.progressBarSpeech.progress = dataHolder.getSizeOfSmallestArray()
+
         val percentage =
             (binding.progressBarSpeech.progress.toFloat() / binding.progressBarSpeech.max.toFloat()) * 100
         binding.txtProgressBarSpeechPercent.text = "${percentage.toInt()}%"
     }
 
-    private fun smallestArraySize(): Int {
-        val arrays = listOf(
-            audioData,
-            stringData
-        )
-        return arrays.minBy { it.size }.size
-    }
-
     private fun enoughData(): Boolean {
-        return smallestArraySize() >= desiredLength
+        return dataHolder.getSizeOfSmallestArray() >= desiredLength
     }
 }

@@ -9,7 +9,7 @@ import android.speech.RecognizerIntent
 import java.io.InputStream
 
 
-class SpeechDataGenerator(private val context: Context) {
+class SpeechDataGatherer(private val context: Context) {
     private val REQUEST_CODE = 100
 
     fun startVoiceRecognition() {
