@@ -15,8 +15,6 @@ class SpeechToTextActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySpeechToTextBinding
     private lateinit var dataHolder: DataHolder
 
-    private val desiredLength = Constants.DESIRED_LENGTH * 10
-
     private lateinit var gatherer: SpeechDataGatherer
 
     private val processor = ByteArrayProcessor()
@@ -35,7 +33,7 @@ class SpeechToTextActivity : AppCompatActivity() {
 
         gatherer = SpeechDataGatherer(this)
 
-        binding.progressBarSpeech.max = desiredLength
+        binding.progressBarSpeech.max = Constants.DESIRED_LENGTH
 
         initDataHolder()
         initListener()
@@ -58,11 +56,11 @@ class SpeechToTextActivity : AppCompatActivity() {
         val listOfData: List<ByteArray> =  gatherer.onActivityResult(requestCode, resultCode, data)
 
         if (!enoughDataFor(speech)) {
-            getStringData(listOfData)
+            addDataToHolder(listOfData[0], speech)
         }
 
         if (!enoughDataFor(audio)) {
-            getAudioData(listOfData)
+            addDataToHolder(listOfData[1], audio)
         }
 
         updateUiElements()
@@ -76,22 +74,13 @@ class SpeechToTextActivity : AppCompatActivity() {
         gatherer.startVoiceRecognition()
     }
 
-    private fun getAudioData(arrays: List<ByteArray>) {
-        var rawAudioData = arrays[1]
+    private fun addDataToHolder(array: ByteArray, dataArrayName: String) {
+        var data = array
 
-        do { rawAudioData = processor.combineAndReduceByteArray(rawAudioData) }
-        while (rawAudioData.size > desiredLength * 2)
+        do { data = processor.combineAndReduceByteArray(data) }
+        while (data.size > Constants.DESIRED_LENGTH * 2)
 
-        dataHolder.concatArray(audio, rawAudioData)
-    }
-
-    private fun getStringData(arrays: List<ByteArray>) {
-        var rawStringData = arrays[0]
-
-        do { rawStringData = processor.combineAndReduceByteArray(rawStringData) }
-        while (rawStringData.size > desiredLength * 2)
-
-        dataHolder.concatArray(speech, rawStringData)
+        dataHolder.concatArray(dataArrayName, data)
     }
 
     private fun saveData() {
@@ -116,7 +105,7 @@ class SpeechToTextActivity : AppCompatActivity() {
         )
     }
 
-    private fun enoughDataFor(name: String) = dataHolder.getSizeOfAnArray(name) >= desiredLength
+    private fun enoughDataFor(name: String) = dataHolder.getSizeOfAnArray(name) >= Constants.DESIRED_LENGTH
 
     private fun resetData() {
         dataHolder.resetData()
@@ -137,6 +126,6 @@ class SpeechToTextActivity : AppCompatActivity() {
     }
 
     private fun enoughData(): Boolean {
-        return dataHolder.getSizeOfSmallestArray() >= desiredLength
+        return dataHolder.getSizeOfSmallestArray() >= Constants.DESIRED_LENGTH
     }
 }
