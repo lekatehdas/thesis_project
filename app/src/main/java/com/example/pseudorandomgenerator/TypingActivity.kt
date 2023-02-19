@@ -3,7 +3,7 @@ package com.example.pseudorandomgenerator
 import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.collectors.TypingActivityCollector
+import com.example.controllers.TypingActivityController
 import com.example.pseudorandomgenerator.databinding.ActivityTypeingBinding
 import com.example.utilities.*
 
@@ -18,7 +18,7 @@ class TypingActivity : AppCompatActivity() {
     )
 
     private lateinit var dataHolder: DataHolder
-    private lateinit var collector: TypingActivityCollector
+    private lateinit var collector: TypingActivityController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +32,7 @@ class TypingActivity : AppCompatActivity() {
         }
 
     private fun initCollector() {
-        collector = TypingActivityCollector(dataHolder, sources, ::updateUiElements, ::resetUiElements, binding.editTxtTimeTyping)
+        collector = TypingActivityController(dataHolder, sources, ::updateUiElements, ::resetUiElements, binding.editTxtTimeTyping)
     }
 
     private fun initDataHolder() {

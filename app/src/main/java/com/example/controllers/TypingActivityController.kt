@@ -1,4 +1,4 @@
-package com.example.collectors
+package com.example.controllers
 
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,7 +11,7 @@ import com.example.utilities.DataHolder
 import com.example.utilities.FirebaseDataSaver
 import java.math.BigInteger
 
-class TypingActivityCollector(
+class TypingActivityController(
     private val dataHolder: DataHolder,
     private val sources: List<String>,
     private val updateUi: () -> Unit,

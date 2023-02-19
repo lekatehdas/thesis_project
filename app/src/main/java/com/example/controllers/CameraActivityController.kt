@@ -1,4 +1,4 @@
-package com.example.collectors
+package com.example.controllers
 
 import android.app.Activity
 import com.example.converters.ByteArrayToBinaryStringConverter
@@ -13,7 +13,7 @@ import com.example.utilities.FirebaseDataSaver
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction0
 
-class CameraActivityCollector(
+class CameraActivityController(
     private val dataHolder: DataHolder,
     private val sources: List<String>,
     private val activity: Activity,

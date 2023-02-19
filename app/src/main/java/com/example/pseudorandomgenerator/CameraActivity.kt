@@ -3,7 +3,7 @@ package com.example.pseudorandomgenerator
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.collectors.CameraActivityCollector
+import com.example.controllers.CameraActivityController
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
@@ -19,7 +19,7 @@ class CameraActivity : AppCompatActivity() {
     )
 
     private lateinit var dataHolder: DataHolder
-    private lateinit var collector: CameraActivityCollector
+    private lateinit var collector: CameraActivityController
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +35,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun initCollector() {
-        collector = CameraActivityCollector(
+        collector = CameraActivityController(
             dataHolder,
             sources,
             this,

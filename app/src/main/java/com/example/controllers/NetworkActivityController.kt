@@ -1,4 +1,4 @@
-package com.example.collectors
+package com.example.controllers
 
 import android.util.Log
 import com.example.converters.ByteArrayToBinaryStringConverter
@@ -11,7 +11,7 @@ import com.example.utilities.FirebaseDataSaver
 import kotlinx.coroutines.*
 import kotlin.reflect.KSuspendFunction0
 
-class NetworkActivityCollector(
+class NetworkActivityController(
     private val dataHolder: DataHolder,
     private val network: String,
     private val updateProgress: KSuspendFunction0<Unit>,
