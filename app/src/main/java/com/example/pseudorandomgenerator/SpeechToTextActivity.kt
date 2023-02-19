@@ -7,8 +7,8 @@ import android.os.Bundle
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.pseudorandomgenerator.databinding.ActivitySpeechToTextBinding
 import com.example.data_gatherers.SpeechDataGatherer
-import com.example.data_processors.ByteArrayListXOR
-import com.example.data_processors.ByteArrayProcessor
+import com.example.data_processors.ListDataProcessor
+import com.example.data_processors.ByteArrayProcessor.combineAndHalveByteArray
 import com.example.utilities.*
 
 class SpeechToTextActivity : AppCompatActivity() {
@@ -16,8 +16,6 @@ class SpeechToTextActivity : AppCompatActivity() {
     private lateinit var dataHolder: DataHolder
 
     private lateinit var gatherer: SpeechDataGatherer
-
-    private val processor = ByteArrayProcessor()
 
     private val speech = "speechData"
     private val audio = "audioData"
@@ -77,7 +75,7 @@ class SpeechToTextActivity : AppCompatActivity() {
     private fun addDataToHolder(array: ByteArray, dataArrayName: String) {
         var data = array
 
-        do { data = processor.combineAndReduceByteArray(data) }
+        do { data = combineAndHalveByteArray(data) }
         while (data.size > Constants.DESIRED_LENGTH * 2)
 
         dataHolder.concatArray(dataArrayName, data)
@@ -86,7 +84,7 @@ class SpeechToTextActivity : AppCompatActivity() {
     private fun saveData() {
         val lists = dataHolder.getAllArrays()
 
-        val xor = ByteArrayListXOR.combineByteArraysThroughXOR(lists)
+        val xor = ListDataProcessor.combineByteArraysByXOR(lists)
         val result = ByteArrayToBinaryStringConverter.convert(xor)
 
         FirebaseDataSaver.saveData(

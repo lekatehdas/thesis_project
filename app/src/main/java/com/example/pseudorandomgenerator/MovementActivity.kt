@@ -12,8 +12,8 @@ import android.os.Bundle
 import com.example.pseudorandomgenerator.databinding.ActivityMovementBinding
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.converters.NumberToByteArrayConverter
-import com.example.data_processors.ByteArrayListXOR
-import com.example.data_processors.LeastSignificantBits
+import com.example.data_processors.ListDataProcessor
+import com.example.data_processors.LongDataProcessor
 import com.example.utilities.*
 import kotlin.experimental.xor
 
@@ -120,7 +120,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             rotationDataXOROldWay.slice(0 until desiredLength).toByteArray(),
             gravityDataXOROldWay.slice(0 until desiredLength).toByteArray()
         )
-        val xor = ByteArrayListXOR.combineByteArraysThroughXOR(listsOfXOR)
+        val xor = ListDataProcessor.combineByteArraysByXOR(listsOfXOR)
         FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(xor),
             table = "movement_XOR_old_way"
@@ -157,7 +157,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             rotationDataLSB,
             gravityDataLSB
         )
-        val lsbXOR = ByteArrayListXOR.combineByteArraysThroughXOR(listOfLSB)
+        val lsbXOR = ListDataProcessor.combineByteArraysByXOR(listOfLSB)
         FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(lsbXOR),
             table = "movement_LSB"
@@ -172,7 +172,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
             rotationDataXOR,
             gravityDataXOR
         )
-        val xor = ByteArrayListXOR.combineByteArraysThroughXOR(listsOfXOR)
+        val xor = ListDataProcessor.combineByteArraysByXOR(listsOfXOR)
         FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(xor),
             table = "movement_XOR"
@@ -294,7 +294,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         val byteList: List<ByteArray> = NumberToByteArrayConverter.convertFloat(values.toList())
         val distilledBytes = distillByteArrays(byteList)
 
-        return ByteArrayListXOR.combineByteArraysThroughXOR(distilledBytes)
+        return ListDataProcessor.combineByteArraysByXOR(distilledBytes)
     }
 
     private fun getBytesXOROldWay(event: SensorEvent): ByteArray {
@@ -302,7 +302,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
 
         val byteList: List<ByteArray> = NumberToByteArrayConverter.convertFloat(values.toList())
 
-        return ByteArrayListXOR.combineByteArraysThroughXOR(byteList)
+        return ListDataProcessor.combineByteArraysByXOR(byteList)
     }
 
     private fun distillByteArrays(byteArrays: List<ByteArray>): List<ByteArray> {
@@ -321,7 +321,7 @@ class MovementActivity : AppCompatActivity(), SensorEventListener {
         val average = (values.sum() / values.size)
         val fractional = getFractionalPartAsLong(average.toString())
 
-        return LeastSignificantBits.modWithPrimeAndGet8LSB(fractional)
+        return LongDataProcessor.getLeastSignificantByte(fractional)
     }
 
     private fun getFractionalPartAsLong(data: String): Long {

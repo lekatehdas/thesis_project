@@ -3,8 +3,8 @@ package com.example.controllers
 import android.util.Log
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.data_gatherers.NetworkTrafficDataGatherer
-import com.example.data_processors.ByteArrayListXOR
-import com.example.data_processors.LeastSignificantBits
+import com.example.data_processors.ListDataProcessor
+import com.example.data_processors.LongDataProcessor
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
 import com.example.utilities.FirebaseDataSaver
@@ -28,7 +28,7 @@ class NetworkActivityController(
 
                 try {
                     val volume = gatherer.networkTrafficVolume()
-                    val data = LeastSignificantBits.discardZerosGet8LSB(volume)
+                    val data = LongDataProcessor.getLeastSignificantByte(volume)
 
                     dataHolder.concatArray(network, data)
 
@@ -54,7 +54,7 @@ class NetworkActivityController(
 
     private fun saveData() {
         val results = dataHolder.getAllArrays()
-        val result = ByteArrayListXOR.combineByteArraysThroughXOR(results)
+        val result = ListDataProcessor.combineByteArraysByXOR(results)
         val string = ByteArrayToBinaryStringConverter.convert(result)
 
         FirebaseDataSaver.saveData(

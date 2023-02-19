@@ -4,8 +4,8 @@ import android.app.Activity
 import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.data_gatherers.AudioDataGatherer
 import com.example.data_gatherers.CameraDataGatherer
-import com.example.data_processors.ByteArrayListXOR
-import com.example.data_processors.LeastSignificantBits
+import com.example.data_processors.ListDataProcessor
+import com.example.data_processors.LongDataProcessor
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
@@ -37,13 +37,13 @@ class CameraActivityController(
 
     private fun onImageData(imageData: String) {
         val imageLong = getFractionalPartAsLong(imageData)
-        val imageByte = LeastSignificantBits.modWithPrimeAndGet8LSB(imageLong)
+        val imageByte = LongDataProcessor.getLeastSignificantByte(imageLong)
         dataHolder.concatArray(camera, imageByte)
 
         val audioData = audioGatherer.getAudioDataAverage()
         if (audioData.isFinite()) {
             val audioLong = getFractionalPartAsLong(audioData.toString())
-            val audioByte = LeastSignificantBits.modWithPrimeAndGet8LSB(audioLong)
+            val audioByte = LongDataProcessor.getLeastSignificantByte(audioLong)
             dataHolder.concatArray(audio, audioByte)
         }
 
@@ -59,7 +59,7 @@ class CameraActivityController(
     private fun saveData() {
 
         val list = dataHolder.getAllArrays()
-        val xor = ByteArrayListXOR.combineByteArraysThroughXOR(list)
+        val xor = ListDataProcessor.combineByteArraysByXOR(list)
 
         FirebaseDataSaver.saveData(
             data = ByteArrayToBinaryStringConverter.convert(xor),

@@ -4,8 +4,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
 import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.data_processors.ByteArrayListXOR
-import com.example.data_processors.LeastSignificantBits
+import com.example.data_processors.ListDataProcessor
+import com.example.data_processors.LongDataProcessor
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
 import com.example.utilities.FirebaseDataSaver
@@ -38,7 +38,7 @@ class TypingActivityController(
 
                 } else {
                     val timeLong = System.nanoTime()
-                    val timeByte = LeastSignificantBits.modWithPrimeAndGet8LSB(timeLong)
+                    val timeByte = LongDataProcessor.getLeastSignificantByte(timeLong)
 
                     if (dataHolder.getSizeOfAnArray(keystroke) < Constants.DESIRED_LENGTH) {
                         val char = s[start + count - 1].toString().toByteArray()
@@ -60,7 +60,7 @@ class TypingActivityController(
     private fun saveData() {
         val lists = dataHolder.getAllArrays()
 
-        val result = ByteArrayListXOR.combineByteArraysThroughXOR(lists)
+        val result = ListDataProcessor.combineByteArraysByXOR(lists)
         val string = ByteArrayToBinaryStringConverter.convert(result)
 
         FirebaseDataSaver.saveData(
