@@ -34,9 +34,14 @@ class DataHolder {
         return if (byteArrays[name] == null) { 0 } else { byteArrays[name]!!.size }
     }
 
-    fun getArraysContainingText(text: String): List<ByteArray> {
+    fun getArraysContainingTextSlicedToDesiredLength(text: String): List<ByteArray> {
         return byteArrays.filterKeys { it.contains(text) }
             .values
             .map { it.sliceArray(0 until Constants.DESIRED_LENGTH) }
+    }
+    fun getArraysContainingText(text: String): List<ByteArray> {
+        return byteArrays.filterKeys { it.contains(text) }
+            .values
+            .toList()
     }
 }
