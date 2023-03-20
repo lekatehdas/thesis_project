@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
         permissionHelper.checkAndAskPermissions()
 
         initListeners()
+        
     }
 
     private fun initListeners() {
