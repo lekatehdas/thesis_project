@@ -4,12 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
-import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.data_gatherers.MovementDataGatherer
-import com.example.data_processors.ListDataProcessor
-import com.example.data_processors.SensorDataProcessor.getLeastSignificantByte
-import com.example.data_processors.SensorDataProcessor.combineFloatsToByteArrayWithXOR
-import com.example.data_processors.SensorDataProcessor.reduceToByteWithXOR
+import com.example.data_processors.LeastSignificantBitExtractor
+import com.example.data_processors.SensorDataProcessor
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
 import com.example.utilities.FirebaseDataSaver
@@ -40,25 +37,13 @@ class MovementActivityController(
         gravityData
     )
 
-    private val xorOld = "_xor_old"
-    private val lsb = "_lsb"
-    private val xor = "_xor"
-    private val affixes = listOf(
-        xorOld,
-        lsb,
-        xor
-    )
-
-
     init {
         initDataHolder()
     }
 
     private fun initDataHolder() {
         for (source in sources) {
-            for (affix in affixes) {
-                dataHolder.initializeArray(source + affix)
-            }
+            dataHolder.initializeList(source)
         }
     }
 
@@ -91,68 +76,65 @@ class MovementActivityController(
     }
 
     private fun gravityDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getArraysContainingText(gravityData))) {
+        if (enoughData(dataHolder.getListSizeContainingText(gravityData))) {
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.addToList(gravityData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.addToList(gravityData + xor, reduceToByteWithXOR(event))
-            dataHolder.addToList(gravityData + lsb, getLeastSignificantByte(event))
+            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
+            val bit = LeastSignificantBitExtractor.extract(longNumber)
+            dataHolder.addToList(gravityData, bit)
         }
     }
 
     private fun gyroscopeDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getArraysContainingText(gyroscopeData))) {
+        if (enoughData(dataHolder.getListSizeContainingText(gyroscopeData))) {
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.addToList(gyroscopeData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.addToList(gyroscopeData + xor, reduceToByteWithXOR(event))
-            dataHolder.addToList(gyroscopeData + lsb, getLeastSignificantByte(event))
+            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
+            val bit = LeastSignificantBitExtractor.extract(longNumber)
+            dataHolder.addToList(gyroscopeData, bit)
         }
     }
 
     private fun magnetometerDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getArraysContainingText(magnetometerData))) {
+        if (enoughData(dataHolder.getListSizeContainingText(magnetometerData))) {
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.addToList(magnetometerData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.addToList(magnetometerData + xor, reduceToByteWithXOR(event))
-            dataHolder.addToList(magnetometerData + lsb, getLeastSignificantByte(event))
+            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
+            val bit = LeastSignificantBitExtractor.extract(longNumber)
+            dataHolder.addToList(magnetometerData, bit)
         }
     }
 
     private fun rotationVectorDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getArraysContainingText(rotationData))) {
+        if (enoughData(dataHolder.getListSizeContainingText(rotationData))) {
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.addToList(rotationData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.addToList(rotationData + xor, reduceToByteWithXOR(event))
-            dataHolder.addToList(rotationData + lsb, getLeastSignificantByte(event))
+            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
+            val bit = LeastSignificantBitExtractor.extract(longNumber)
+            dataHolder.addToList(rotationData, bit)
         }
     }
 
     private fun accelerometerDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getArraysContainingText(accelerationData))) {
+        if (enoughData(dataHolder.getListSizeContainingText(accelerationData))) {
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.addToList(accelerationData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.addToList(accelerationData + xor, reduceToByteWithXOR(event))
-            dataHolder.addToList(accelerationData + lsb, getLeastSignificantByte(event))
+            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
+            val bit = LeastSignificantBitExtractor.extract(longNumber)
+            dataHolder.addToList(accelerationData, bit)
         }
     }
 
-    private fun enoughData(list: List<ByteArray>): Boolean {
-        return list.all { it.size >= Constants.DESIRED_LENGTH }
+    private fun enoughData(size: Int): Boolean {
+        return size >= Constants.DESIRED_LENGTH
     }
 
     private fun saveData() {
-        saveXOR()
-        saveXOROld()
-        saveLSB()
         saveEachDataArray()
     }
 
@@ -160,55 +142,20 @@ class MovementActivityController(
         dataHolder.resetData()
     }
 
-    private fun saveXOROld() {
-        val listsOfXOR = dataHolder.getArraysContainingTextSlicedToDesiredLength(xorOld)
-        val xor = ListDataProcessor.combineByteArraysByXOR(listsOfXOR)
-
-        FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(xor),
-            table = "movement_XOR_old_way"
-        )
-    }
-
     private fun saveEachDataArray() {
         val list = listOf(
-            Pair("movement_accelerationDataXOR", dataHolder.getList(accelerationData + xor)),
-            Pair("movement_gyroscopeDataXOR", dataHolder.getList(gyroscopeData + xor)),
-            Pair("movement_magnetometerDataXOR", dataHolder.getList(magnetometerData + xor)),
-            Pair("movement_rotationDataXOR", dataHolder.getList(rotationData + xor)),
-            Pair("movement_gravityDataXOR", dataHolder.getList(gravityData + xor)),
-            Pair("movement_accelerationDataLSB", dataHolder.getList(accelerationData + lsb)),
-            Pair("movement_gyroscopeDataLSB", dataHolder.getList(gyroscopeData + lsb)),
-            Pair("movement_magnetometerDataLSB", dataHolder.getList(magnetometerData + lsb)),
-            Pair("movement_rotationDataLSB", dataHolder.getList(rotationData + lsb)),
-            Pair("movement_gravityDataLSB", dataHolder.getList(gravityData + lsb))
+            Pair("movement_acceleration", dataHolder.getList(accelerationData)),
+            Pair("movement_gyroscope", dataHolder.getList(gyroscopeData)),
+            Pair("movement_magnetometer", dataHolder.getList(magnetometerData)),
+            Pair("movement_rotation", dataHolder.getList(rotationData)),
+            Pair("movement_gravity", dataHolder.getList(gravityData))
         )
 
         list.forEach { (table, data) ->
             FirebaseDataSaver.saveData(
                 table = table,
-                data = ByteArrayToBinaryStringConverter.convert(data)
+                data = data
             )
         }
-    }
-
-    private fun saveLSB() {
-        val listOfLSB = dataHolder.getArraysContainingTextSlicedToDesiredLength(lsb)
-        val lsbXOR = ListDataProcessor.combineByteArraysByXOR(listOfLSB)
-
-        FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(lsbXOR),
-            table = "movement_LSB"
-        )
-    }
-
-    private fun saveXOR() {
-        val listsOfXOR = dataHolder.getArraysContainingTextSlicedToDesiredLength(xor)
-        val xor = ListDataProcessor.combineByteArraysByXOR(listsOfXOR)
-
-        FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(xor),
-            table = "movement_XOR"
-        )
     }
 }

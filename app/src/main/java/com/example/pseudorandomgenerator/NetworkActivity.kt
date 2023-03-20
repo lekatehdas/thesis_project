@@ -49,7 +49,7 @@ class NetworkActivity : AppCompatActivity() {
     private fun initDataHolder() {
         dataHolder = DataHolder()
         for (name in sources)
-            dataHolder.initializeArray(name)
+            dataHolder.initializeList(name)
     }
 
     @SuppressLint("SetTextI18n")

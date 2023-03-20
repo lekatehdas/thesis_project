@@ -1,10 +1,12 @@
 package com.example.data_processors
 
 import android.hardware.SensorEvent
-import com.example.converters.ListToByteArrayListConverter
-import kotlin.experimental.xor
+import kotlin.math.roundToLong
 
 object SensorDataProcessor {
+    /*
+    All this was used in the first iteration of the program.
+
     fun reduceToByteWithXOR(event: SensorEvent): ByteArray {
         val values: FloatArray = event.values
 
@@ -46,5 +48,13 @@ object SensorDataProcessor {
             return data.filter { it.isDigit() }.toLong()
 
         return data.split(".")[1].toLong()
+    }
+     */
+    fun xorToSingleNumber(event: SensorEvent): Long {
+        val floatArray = event.values
+        val longArray = floatArray.map { it.roundToLong() }
+
+        // Perform XOR operation on all the values
+        return longArray.reduce { acc, value -> acc xor value }
     }
 }

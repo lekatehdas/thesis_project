@@ -30,7 +30,7 @@ class CameraActivityController(
         cameraGatherer.stopCamera()
     }
 
-    private fun onImageData(imageData: Double) {
+    private fun onImageData(imageData: Long) {
         val imageBit = LeastSignificantBitExtractor.extract(imageData)
 
         dataHolder.addToList(camera, imageBit)

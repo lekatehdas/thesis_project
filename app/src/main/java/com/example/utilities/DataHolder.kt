@@ -3,7 +3,7 @@ package com.example.utilities
 class DataHolder {
     private val bitLists: MutableMap<String, MutableList<Boolean>> = mutableMapOf()
 
-    fun initializeArray(name: String) {
+    fun initializeList(name: String) {
         bitLists[name] = mutableListOf()
     }
 
@@ -40,10 +40,10 @@ class DataHolder {
             .map { bitListToString(it.take(Constants.DESIRED_LENGTH)) }
     }
 
-    fun getArraysContainingText(text: String): List<String> {
+    fun getListSizeContainingText(text: String): Int {
         return bitLists.filterKeys { it.contains(text) }
             .values
-            .map(::bitListToString)
+            .size
     }
 
     private fun bitListToString(bitList: List<Boolean>): String {

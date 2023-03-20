@@ -46,7 +46,7 @@ class CameraActivity : AppCompatActivity() {
     private fun initDataHolder() {
         dataHolder = DataHolder()
         for (name in sources)
-            dataHolder.initializeArray(name)
+            dataHolder.initializeList(name)
     }
 
     private fun initListeners() {

@@ -46,7 +46,7 @@ class SpeechToTextActivity : AppCompatActivity() {
     private fun initDataHolder() {
         dataHolder = DataHolder()
         for (name in sources)
-            dataHolder.initializeArray(name)
+            dataHolder.initializeList(name)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
