@@ -43,7 +43,7 @@ class TypingActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     fun updateUiElements() {
-        binding.progressBarTimeTyping.progress = dataHolder.getSizeOfSmallestArray()
+        binding.progressBarTimeTyping.progress = dataHolder.getSizeOfSmallestList()
 
         val percentage =
             (binding.progressBarTimeTyping.progress.toFloat() / binding.progressBarTimeTyping.max.toFloat()) * 100

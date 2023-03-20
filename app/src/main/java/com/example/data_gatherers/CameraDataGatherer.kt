@@ -17,7 +17,7 @@ import kotlin.reflect.KFunction1
 class CameraDataGatherer(
     private val activity: Activity,
     private val binding: ActivityCameraBinding,
-    private val exportData: KFunction1<String, Unit>
+    private val exportData: KFunction1<Double, Unit>
 ) {
 
     private var cameraExecutor = Executors.newSingleThreadExecutor()
@@ -88,12 +88,12 @@ class CameraDataGatherer(
             image.close()
         }
 
-        private fun getAverageValueOfTheFrame(image: ImageProxy): String {
+        private fun getAverageValueOfTheFrame(image: ImageProxy): Double {
             val buffer = image.planes[0].buffer
             val data = buffer.toByteArray()
             val pixels = data.map { it.toInt() and 0xFF }
 
-            return pixels.average().toString()
+            return pixels.average()
         }
 
         private fun ByteBuffer.toByteArray(): ByteArray {

@@ -11,11 +11,9 @@ import com.example.utilities.DataHolder
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
     private val camera = "cameraData"
-    private val audio = "audioData"
 
     private val sources = listOf(
-        camera,
-        audio
+        camera
     )
 
     private lateinit var dataHolder: DataHolder
@@ -70,7 +68,7 @@ class CameraActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private suspend fun updateProgressInUi() {
-        binding.progressBarCamera.progress = dataHolder.getSizeOfSmallestArray()
+        binding.progressBarCamera.progress = dataHolder.getSizeOfSmallestList()
 
         val percentage =
             (binding.progressBarCamera.progress.toFloat() / binding.progressBarCamera.max.toFloat()) * 100

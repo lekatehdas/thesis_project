@@ -31,7 +31,7 @@ class TypingActivityController(
                     return
                 }
 
-                if (dataHolder.getSizeOfSmallestArray() >= Constants.DESIRED_LENGTH) {
+                if (dataHolder.getSizeOfSmallestList() >= Constants.DESIRED_LENGTH) {
                     saveData()
                     dataHolder.resetData()
                     resetUi()
@@ -40,15 +40,15 @@ class TypingActivityController(
                     val timeLong = System.nanoTime()
                     val timeByte = LongDataProcessor.getLeastSignificantByte(timeLong)
 
-                    if (dataHolder.getSizeOfAnArray(keystroke) < Constants.DESIRED_LENGTH) {
+                    if (dataHolder.getSizeOfAList(keystroke) < Constants.DESIRED_LENGTH) {
                         val char = s[start + count - 1].toString().toByteArray()
                         val scrambleChar = scrambleChar(char, timeByte)
 
-                        dataHolder.concatArray(keystroke, scrambleChar)
+                        dataHolder.addToList(keystroke, scrambleChar)
                     }
 
-                    if (dataHolder.getSizeOfAnArray(time) < Constants.DESIRED_LENGTH)
-                        dataHolder.concatArray(time, timeByte)
+                    if (dataHolder.getSizeOfAList(time) < Constants.DESIRED_LENGTH)
+                        dataHolder.addToList(time, timeByte)
 
                 }
 
@@ -58,7 +58,7 @@ class TypingActivityController(
     }
 
     private fun saveData() {
-        val lists = dataHolder.getAllArrays()
+        val lists = dataHolder.getAllLists()
 
         val result = ListDataProcessor.combineByteArraysByXOR(lists)
         val string = ByteArrayToBinaryStringConverter.convert(result)
@@ -69,12 +69,12 @@ class TypingActivityController(
         )
 
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(keystroke)),
+            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getList(keystroke)),
             table = "typing_keystroke_alone"
         )
 
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(time)),
+            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getList(time)),
             table = "typing_time_alone"
         )
     }

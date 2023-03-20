@@ -24,13 +24,13 @@ class NetworkActivityController(
 
     fun start() {
         job = CoroutineScope(Job()).launch {
-            while (isActive && dataHolder.getSizeOfSmallestArray() < Constants.DESIRED_LENGTH) {
+            while (isActive && dataHolder.getSizeOfSmallestList() < Constants.DESIRED_LENGTH) {
 
                 try {
                     val volume = gatherer.networkTrafficVolume()
                     val data = LongDataProcessor.getLeastSignificantByte(volume)
 
-                    dataHolder.concatArray(network, data)
+                    dataHolder.addToList(network, data)
 
                     updateProgress()
                     delay(500)
@@ -40,7 +40,7 @@ class NetworkActivityController(
                 }
             }
 
-            if (dataHolder.getSizeOfSmallestArray() >= Constants.DESIRED_LENGTH) {
+            if (dataHolder.getSizeOfSmallestList() >= Constants.DESIRED_LENGTH) {
                 saveData()
                 resetData()
                 resetUi()
@@ -53,7 +53,7 @@ class NetworkActivityController(
     }
 
     private fun saveData() {
-        val results = dataHolder.getAllArrays()
+        val results = dataHolder.getAllLists()
         val result = ListDataProcessor.combineByteArraysByXOR(results)
         val string = ByteArrayToBinaryStringConverter.convert(result)
 

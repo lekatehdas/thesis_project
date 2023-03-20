@@ -82,7 +82,7 @@ class NetworkActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private suspend fun updateProgressInUi() {
         withContext(Dispatchers.Main) {
-            binding.progressBarNetwork.progress = dataHolder.getSizeOfSmallestArray()
+            binding.progressBarNetwork.progress = dataHolder.getSizeOfSmallestList()
 
             val percentage = (
                     binding.progressBarNetwork.progress.toFloat() /

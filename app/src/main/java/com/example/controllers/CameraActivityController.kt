@@ -1,11 +1,8 @@
 package com.example.controllers
 
 import android.app.Activity
-import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.data_gatherers.AudioDataGatherer
 import com.example.data_gatherers.CameraDataGatherer
-import com.example.data_processors.ListDataProcessor
-import com.example.data_processors.LongDataProcessor
+import com.example.data_processors.LeastSignificantBitExtractor
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
@@ -23,9 +20,7 @@ class CameraActivityController(
 ) {
 
     private val cameraGatherer = CameraDataGatherer(activity, binding, ::onImageData)
-    private val audioGatherer = AudioDataGatherer(activity)
     private val camera = sources[0]
-    private val audio = sources[1]
 
     fun start() {
         cameraGatherer.startCamera()
@@ -35,19 +30,12 @@ class CameraActivityController(
         cameraGatherer.stopCamera()
     }
 
-    private fun onImageData(imageData: String) {
-        val imageLong = getFractionalPartAsLong(imageData)
-        val imageByte = LongDataProcessor.getLeastSignificantByte(imageLong)
-        dataHolder.concatArray(camera, imageByte)
+    private fun onImageData(imageData: Double) {
+        val imageBit = LeastSignificantBitExtractor.extract(imageData)
 
-        val audioData = audioGatherer.getAudioDataAverage()
-        if (audioData.isFinite()) {
-            val audioLong = getFractionalPartAsLong(audioData.toString())
-            val audioByte = LongDataProcessor.getLeastSignificantByte(audioLong)
-            dataHolder.concatArray(audio, audioByte)
-        }
+        dataHolder.addToList(camera, imageBit)
 
-        if (dataHolder.getSizeOfSmallestArray() >= Constants.DESIRED_LENGTH) {
+        if (dataHolder.getSizeOfSmallestList() >= Constants.DESIRED_LENGTH) {
             saveData()
             resetData()
             activity.runOnUiThread { runBlocking {  resetUi() } }
@@ -57,29 +45,13 @@ class CameraActivityController(
     }
 
     private fun saveData() {
-
-        val list = dataHolder.getAllArrays()
-        val xor = ListDataProcessor.combineByteArraysByXOR(list)
-
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(xor),
+            data = dataHolder.getList(camera),
             table = "camera"
-        )
-
-        FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(camera)),
-            table = "camera_alone"
-        )
-
-        FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(audio)),
-            table = "camera_audio_alone"
         )
     }
 
     private fun resetData() {
         dataHolder.resetData()
     }
-
-    private fun getFractionalPartAsLong(data: String) = data.split(".")[1].toLong()
 }

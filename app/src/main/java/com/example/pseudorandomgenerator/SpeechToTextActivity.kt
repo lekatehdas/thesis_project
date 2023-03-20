@@ -78,11 +78,11 @@ class SpeechToTextActivity : AppCompatActivity() {
         do { data = combineAndHalveByteArray(data) }
         while (data.size > Constants.DESIRED_LENGTH * 2)
 
-        dataHolder.concatArray(dataArrayName, data)
+        dataHolder.addToList(dataArrayName, data)
     }
 
     private fun saveData() {
-        val lists = dataHolder.getAllArrays()
+        val lists = dataHolder.getAllLists()
 
         val xor = ListDataProcessor.combineByteArraysByXOR(lists)
         val result = ByteArrayToBinaryStringConverter.convert(xor)
@@ -93,17 +93,17 @@ class SpeechToTextActivity : AppCompatActivity() {
         )
 
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(audio)),
+            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getList(audio)),
             table = "speech_audio_alone"
         )
 
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(speech)),
+            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getList(speech)),
             table = "speech_text_alone"
         )
     }
 
-    private fun enoughDataFor(name: String) = dataHolder.getSizeOfAnArray(name) >= Constants.DESIRED_LENGTH
+    private fun enoughDataFor(name: String) = dataHolder.getSizeOfAList(name) >= Constants.DESIRED_LENGTH
 
     private fun resetData() {
         dataHolder.resetData()
@@ -116,7 +116,7 @@ class SpeechToTextActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateUiElements() {
-        binding.progressBarSpeech.progress = dataHolder.getSizeOfSmallestArray()
+        binding.progressBarSpeech.progress = dataHolder.getSizeOfSmallestList()
 
         val percentage =
             (binding.progressBarSpeech.progress.toFloat() / binding.progressBarSpeech.max.toFloat()) * 100
@@ -124,6 +124,6 @@ class SpeechToTextActivity : AppCompatActivity() {
     }
 
     private fun enoughData(): Boolean {
-        return dataHolder.getSizeOfSmallestArray() >= Constants.DESIRED_LENGTH
+        return dataHolder.getSizeOfSmallestList() >= Constants.DESIRED_LENGTH
     }
 }

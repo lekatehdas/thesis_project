@@ -67,7 +67,7 @@ class MovementActivityController(
     }
 
     private fun onData(event: SensorEvent) {
-        if (dataHolder.getSizeOfSmallestArray() >= Constants.DESIRED_LENGTH) {
+        if (dataHolder.getSizeOfSmallestList() >= Constants.DESIRED_LENGTH) {
             gatherer.stop()
             saveData()
             resetData()
@@ -76,7 +76,7 @@ class MovementActivityController(
             gatherer.start() //TODO This is only for infinite loop, to make the data generating easier.
         } else {
             getDataFromEvent(event)
-            (context as Activity).runOnUiThread { runBlocking { updateUi(dataHolder.getSizeOfSmallestArray()) } }
+            (context as Activity).runOnUiThread { runBlocking { updateUi(dataHolder.getSizeOfSmallestList()) } }
         }
     }
 
@@ -95,9 +95,9 @@ class MovementActivityController(
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.concatArray(gravityData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.concatArray(gravityData + xor, reduceToByteWithXOR(event))
-            dataHolder.concatArray(gravityData + lsb, getLeastSignificantByte(event))
+            dataHolder.addToList(gravityData + xorOld, combineFloatsToByteArrayWithXOR(event))
+            dataHolder.addToList(gravityData + xor, reduceToByteWithXOR(event))
+            dataHolder.addToList(gravityData + lsb, getLeastSignificantByte(event))
         }
     }
 
@@ -106,9 +106,9 @@ class MovementActivityController(
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.concatArray(gyroscopeData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.concatArray(gyroscopeData + xor, reduceToByteWithXOR(event))
-            dataHolder.concatArray(gyroscopeData + lsb, getLeastSignificantByte(event))
+            dataHolder.addToList(gyroscopeData + xorOld, combineFloatsToByteArrayWithXOR(event))
+            dataHolder.addToList(gyroscopeData + xor, reduceToByteWithXOR(event))
+            dataHolder.addToList(gyroscopeData + lsb, getLeastSignificantByte(event))
         }
     }
 
@@ -117,9 +117,9 @@ class MovementActivityController(
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.concatArray(magnetometerData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.concatArray(magnetometerData + xor, reduceToByteWithXOR(event))
-            dataHolder.concatArray(magnetometerData + lsb, getLeastSignificantByte(event))
+            dataHolder.addToList(magnetometerData + xorOld, combineFloatsToByteArrayWithXOR(event))
+            dataHolder.addToList(magnetometerData + xor, reduceToByteWithXOR(event))
+            dataHolder.addToList(magnetometerData + lsb, getLeastSignificantByte(event))
         }
     }
 
@@ -128,9 +128,9 @@ class MovementActivityController(
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.concatArray(rotationData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.concatArray(rotationData + xor, reduceToByteWithXOR(event))
-            dataHolder.concatArray(rotationData + lsb, getLeastSignificantByte(event))
+            dataHolder.addToList(rotationData + xorOld, combineFloatsToByteArrayWithXOR(event))
+            dataHolder.addToList(rotationData + xor, reduceToByteWithXOR(event))
+            dataHolder.addToList(rotationData + lsb, getLeastSignificantByte(event))
         }
     }
 
@@ -139,9 +139,9 @@ class MovementActivityController(
             gatherer.unregisterSensor(event.sensor)
 
         } else {
-            dataHolder.concatArray(accelerationData + xorOld, combineFloatsToByteArrayWithXOR(event))
-            dataHolder.concatArray(accelerationData + xor, reduceToByteWithXOR(event))
-            dataHolder.concatArray(accelerationData + lsb, getLeastSignificantByte(event))
+            dataHolder.addToList(accelerationData + xorOld, combineFloatsToByteArrayWithXOR(event))
+            dataHolder.addToList(accelerationData + xor, reduceToByteWithXOR(event))
+            dataHolder.addToList(accelerationData + lsb, getLeastSignificantByte(event))
         }
     }
 
@@ -172,16 +172,16 @@ class MovementActivityController(
 
     private fun saveEachDataArray() {
         val list = listOf(
-            Pair("movement_accelerationDataXOR", dataHolder.getArray(accelerationData + xor)),
-            Pair("movement_gyroscopeDataXOR", dataHolder.getArray(gyroscopeData + xor)),
-            Pair("movement_magnetometerDataXOR", dataHolder.getArray(magnetometerData + xor)),
-            Pair("movement_rotationDataXOR", dataHolder.getArray(rotationData + xor)),
-            Pair("movement_gravityDataXOR", dataHolder.getArray(gravityData + xor)),
-            Pair("movement_accelerationDataLSB", dataHolder.getArray(accelerationData + lsb)),
-            Pair("movement_gyroscopeDataLSB", dataHolder.getArray(gyroscopeData + lsb)),
-            Pair("movement_magnetometerDataLSB", dataHolder.getArray(magnetometerData + lsb)),
-            Pair("movement_rotationDataLSB", dataHolder.getArray(rotationData + lsb)),
-            Pair("movement_gravityDataLSB", dataHolder.getArray(gravityData + lsb))
+            Pair("movement_accelerationDataXOR", dataHolder.getList(accelerationData + xor)),
+            Pair("movement_gyroscopeDataXOR", dataHolder.getList(gyroscopeData + xor)),
+            Pair("movement_magnetometerDataXOR", dataHolder.getList(magnetometerData + xor)),
+            Pair("movement_rotationDataXOR", dataHolder.getList(rotationData + xor)),
+            Pair("movement_gravityDataXOR", dataHolder.getList(gravityData + xor)),
+            Pair("movement_accelerationDataLSB", dataHolder.getList(accelerationData + lsb)),
+            Pair("movement_gyroscopeDataLSB", dataHolder.getList(gyroscopeData + lsb)),
+            Pair("movement_magnetometerDataLSB", dataHolder.getList(magnetometerData + lsb)),
+            Pair("movement_rotationDataLSB", dataHolder.getList(rotationData + lsb)),
+            Pair("movement_gravityDataLSB", dataHolder.getList(gravityData + lsb))
         )
 
         list.forEach { (table, data) ->

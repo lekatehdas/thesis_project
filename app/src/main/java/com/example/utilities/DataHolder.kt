@@ -1,47 +1,52 @@
 package com.example.utilities
 
 class DataHolder {
-    private val byteArrays: MutableMap<String, ByteArray> = mutableMapOf()
+    private val bitLists: MutableMap<String, MutableList<Boolean>> = mutableMapOf()
 
     fun initializeArray(name: String) {
-        byteArrays[name] = ByteArray(0)
+        bitLists[name] = mutableListOf()
     }
 
-    fun concatArray(name: String, byteArray: ByteArray) {
-        if (byteArrays[name] == null)
+    fun addToList(name: String, value: Boolean) {
+        if (bitLists[name] == null)
             return
 
-        byteArrays[name] = byteArrays[name]!! + byteArray
+        bitLists[name]!!.add(value)
     }
 
-    fun getArray(name: String): ByteArray {
-        return byteArrays[name]?.sliceArray(0 until Constants.DESIRED_LENGTH) ?: return ByteArray(0)
+    fun getList(name: String): String {
+        return bitListToString(bitLists[name]?.take(Constants.DESIRED_LENGTH) ?: listOf())
     }
 
-    fun getAllArrays(): List<ByteArray> {
-        return byteArrays.values.map { it.sliceArray(0 until Constants.DESIRED_LENGTH) }
+    fun getAllLists(): List<String> {
+        return bitLists.values.map { bitListToString(it.take(Constants.DESIRED_LENGTH)) }
     }
 
     fun resetData() {
-        byteArrays.forEach { (name, _) -> byteArrays[name] = ByteArray(0) }
+        bitLists.forEach { (name, _) -> bitLists[name] = mutableListOf() }
     }
 
-    fun getSizeOfSmallestArray(): Int {
-        return if (byteArrays.isEmpty()) { 0 } else { byteArrays.values.minBy { it.size }.size }
+    fun getSizeOfSmallestList(): Int {
+        return if (bitLists.isEmpty()) 0 else bitLists.values.minByOrNull { it.size }?.size ?: 0
     }
 
-    fun getSizeOfAnArray(name: String): Int {
-        return if (byteArrays[name] == null) { 0 } else { byteArrays[name]!!.size }
+    fun getSizeOfAList(name: String): Int {
+        return bitLists[name]?.size ?: 0
     }
 
-    fun getArraysContainingTextSlicedToDesiredLength(text: String): List<ByteArray> {
-        return byteArrays.filterKeys { it.contains(text) }
+    fun getArraysContainingTextSlicedToDesiredLength(text: String): List<String> {
+        return bitLists.filterKeys { it.contains(text) }
             .values
-            .map { it.sliceArray(0 until Constants.DESIRED_LENGTH) }
+            .map { bitListToString(it.take(Constants.DESIRED_LENGTH)) }
     }
-    fun getArraysContainingText(text: String): List<ByteArray> {
-        return byteArrays.filterKeys { it.contains(text) }
+
+    fun getArraysContainingText(text: String): List<String> {
+        return bitLists.filterKeys { it.contains(text) }
             .values
-            .toList()
+            .map(::bitListToString)
+    }
+
+    private fun bitListToString(bitList: List<Boolean>): String {
+        return bitList.joinToString(separator = "") { if (it) "1" else "0" }
     }
 }
