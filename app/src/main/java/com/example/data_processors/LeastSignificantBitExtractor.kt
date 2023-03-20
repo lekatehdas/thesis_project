@@ -1,9 +1,24 @@
 package com.example.data_processors
 
-object LeastSignificantBitExtractor {
-    fun extract(data: Long): Boolean {
-        val lsb = data and 1
+import kotlin.experimental.and
 
-        return lsb == 1L
+object LeastSignificantBitExtractor {
+    inline fun <reified T : Number> extract(data: T): Boolean {
+        val lsb = when (T::class) {
+            Long::class -> (data as Long) and 1
+            Int::class -> (data as Int) and 1
+            Short::class -> (data as Short) and 1
+            Byte::class -> (data as Byte) and 1
+            else -> throw IllegalArgumentException("Unsupported type")
+        }
+
+        return lsb == 1
+    }
+
+    fun extract(data: Char): Boolean {
+        val lsb = data.code and 1
+
+        return lsb == 1
     }
 }
+

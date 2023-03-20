@@ -3,13 +3,10 @@ package com.example.controllers
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
-import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.data_processors.ListDataProcessor
-import com.example.data_processors.LongDataProcessor
+import com.example.data_processors.LeastSignificantBitExtractor
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
 import com.example.utilities.FirebaseDataSaver
-import java.math.BigInteger
 
 class TypingActivityController(
     private val dataHolder: DataHolder,
@@ -38,18 +35,13 @@ class TypingActivityController(
 
                 } else {
                     val timeLong = System.nanoTime()
-                    val timeByte = LongDataProcessor.getLeastSignificantByte(timeLong)
+                    val timeBit = LeastSignificantBitExtractor.extract(timeLong)
 
-                    if (dataHolder.getSizeOfAList(keystroke) < Constants.DESIRED_LENGTH) {
-                        val char = s[start + count - 1].toString().toByteArray()
-                        val scrambleChar = scrambleChar(char, timeByte)
+                    val char = s[start + count - 1]
+                    val charBit = LeastSignificantBitExtractor.extract(char)
 
-                        dataHolder.addToList(keystroke, scrambleChar)
-                    }
-
-                    if (dataHolder.getSizeOfAList(time) < Constants.DESIRED_LENGTH)
-                        dataHolder.addToList(time, timeByte)
-
+                    dataHolder.addToList(keystroke, charBit)
+                    dataHolder.addToList(time, timeBit)
                 }
 
                 updateUi()
@@ -58,29 +50,14 @@ class TypingActivityController(
     }
 
     private fun saveData() {
-        val lists = dataHolder.getAllLists()
-
-        val result = ListDataProcessor.combineByteArraysByXOR(lists)
-        val string = ByteArrayToBinaryStringConverter.convert(result)
-
         FirebaseDataSaver.saveData(
-            data = string,
-            table = "typing"
+            data = dataHolder.getList(keystroke),
+            table = "keystroke"
         )
 
         FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getList(keystroke)),
-            table = "typing_keystroke_alone"
+            data = dataHolder.getList(time),
+            table = "time"
         )
-
-        FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getList(time)),
-            table = "typing_time_alone"
-        )
-    }
-
-    private fun scrambleChar(char: ByteArray, time: ByteArray): ByteArray {
-        val result = (BigInteger(time) + BigInteger(char)) % Constants.PRIME_FOR_MOD.toBigInteger()
-        return result.toByteArray()
     }
 }
