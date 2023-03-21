@@ -5,7 +5,7 @@ import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import com.example.data_gatherers.MovementDataGatherer
-import com.example.data_processors.LeastSignificantBitExtractor
+import com.example.data_processors.LsbExtractor
 import com.example.data_processors.SensorDataProcessor
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
@@ -19,32 +19,18 @@ class MovementActivityController(
 ) {
 
     private val dataHolder = DataHolder()
-    private val gatherer = MovementDataGatherer(
-        context,
-        ::onData
-    )
+    private val gatherer = MovementDataGatherer(context, ::onData)
 
-    private val accelerationData = "accelerationData"
-    private val gyroscopeData = "gyroscopeData"
-    private val magnetometerData = "magnetometerData"
-    private val rotationData = "rotationData"
-    private val gravityData = "gravityData"
-    private val sources = listOf(
-        accelerationData,
-        gyroscopeData,
-        magnetometerData,
-        rotationData,
-        gravityData
+    private val sensorSources = mapOf(
+        Sensor.TYPE_ACCELEROMETER to "accelerationData",
+        Sensor.TYPE_ROTATION_VECTOR to "rotationData",
+        Sensor.TYPE_MAGNETIC_FIELD to "magnetometerData",
+        Sensor.TYPE_GYROSCOPE to "gyroscopeData",
+        Sensor.TYPE_GRAVITY to "gravityData"
     )
 
     init {
-        initDataHolder()
-    }
-
-    private fun initDataHolder() {
-        for (source in sources) {
-            dataHolder.initializeList(source)
-        }
+        dataHolder.initializeLists(sensorSources.values)
     }
 
     fun start() {
@@ -52,110 +38,55 @@ class MovementActivityController(
     }
 
     private fun onData(event: SensorEvent) {
-        if (dataHolder.getSizeOfSmallestList() >= Constants.DESIRED_LENGTH) {
-            gatherer.stop()
-            saveData()
-            resetData()
+        val sensorType = event.sensor.type
+        val sensorName = sensorSources[sensorType] ?: return
 
-            (context as Activity).runOnUiThread { runBlocking { resetUi } }
-            gatherer.start() //TODO This is only for infinite loop, to make the data generating easier.
+        if (dataHolder.getSizeOfSmallestList() >= Constants.DESIRED_LENGTH) {
+            processFullData()
         } else {
-            getDataFromEvent(event)
+            sensorDataHandler(sensorName, event)
+        }
+    }
+
+    private fun sensorDataHandler(sensorName: String, event: SensorEvent) {
+        if (enoughData(dataHolder.getListSizeContainingText(sensorName))) {
+            gatherer.unregisterSensor(event.sensor)
+        } else {
+            addToDataHolder(sensorName, event)
             (context as Activity).runOnUiThread { runBlocking { updateUi(dataHolder.getSizeOfSmallestList()) } }
         }
     }
 
-    private fun getDataFromEvent(event: SensorEvent) {
-        when (event.sensor.type) {
-            Sensor.TYPE_ACCELEROMETER -> accelerometerDataHandler(event)
-            Sensor.TYPE_ROTATION_VECTOR -> rotationVectorDataHandler(event)
-            Sensor.TYPE_MAGNETIC_FIELD -> magnetometerDataHandler(event)
-            Sensor.TYPE_GYROSCOPE -> gyroscopeDataHandler(event)
-            Sensor.TYPE_GRAVITY -> gravityDataHandler(event)
-        }
-    }
-
-    private fun gravityDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getListSizeContainingText(gravityData))) {
-            gatherer.unregisterSensor(event.sensor)
-
-        } else {
-            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
-            val bit = LeastSignificantBitExtractor.extract(longNumber)
-            dataHolder.addToList(gravityData, bit)
-        }
-    }
-
-    private fun gyroscopeDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getListSizeContainingText(gyroscopeData))) {
-            gatherer.unregisterSensor(event.sensor)
-
-        } else {
-            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
-            val bit = LeastSignificantBitExtractor.extract(longNumber)
-            dataHolder.addToList(gyroscopeData, bit)
-        }
-    }
-
-    private fun magnetometerDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getListSizeContainingText(magnetometerData))) {
-            gatherer.unregisterSensor(event.sensor)
-
-        } else {
-            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
-            val bit = LeastSignificantBitExtractor.extract(longNumber)
-            dataHolder.addToList(magnetometerData, bit)
-        }
-    }
-
-    private fun rotationVectorDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getListSizeContainingText(rotationData))) {
-            gatherer.unregisterSensor(event.sensor)
-
-        } else {
-            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
-            val bit = LeastSignificantBitExtractor.extract(longNumber)
-            dataHolder.addToList(rotationData, bit)
-        }
-    }
-
-    private fun accelerometerDataHandler(event: SensorEvent) {
-        if (enoughData(dataHolder.getListSizeContainingText(accelerationData))) {
-            gatherer.unregisterSensor(event.sensor)
-
-        } else {
-            val longNumber = SensorDataProcessor.xorToSingleNumber(event)
-            val bit = LeastSignificantBitExtractor.extract(longNumber)
-            dataHolder.addToList(accelerationData, bit)
-        }
+    private fun addToDataHolder(sensorName: String, event: SensorEvent) {
+        val longNumber = SensorDataProcessor.xorToSingleNumber(event)
+        val bit = LsbExtractor.long(longNumber)
+        dataHolder.addToList(sensorName, bit)
     }
 
     private fun enoughData(size: Int): Boolean {
         return size >= Constants.DESIRED_LENGTH
     }
 
-    private fun saveData() {
-        saveEachDataArray()
-    }
-
-    private fun resetData() {
+    private fun processFullData() {
+        gatherer.stop()
+        saveData()
         dataHolder.resetData()
+
+        (context as Activity).runOnUiThread { runBlocking { resetUi() } }
+        gatherer.start() //TODO This is only for infinite loop, to make the data generating easier.
     }
 
-    private fun saveEachDataArray() {
+    private fun saveData() {
         val list = listOf(
-            Pair("movement_acceleration", dataHolder.getList(accelerationData)),
-            Pair("movement_gyroscope", dataHolder.getList(gyroscopeData)),
-            Pair("movement_magnetometer", dataHolder.getList(magnetometerData)),
-            Pair("movement_rotation", dataHolder.getList(rotationData)),
-            Pair("movement_gravity", dataHolder.getList(gravityData))
+            Pair("movement_acceleration", dataHolder.getList("accelerationData")),
+            Pair("movement_gyroscope", dataHolder.getList("gyroscopeData")),
+            Pair("movement_magnetometer", dataHolder.getList("magnetometerData")),
+            Pair("movement_rotation", dataHolder.getList("rotationData")),
+            Pair("movement_gravity", dataHolder.getList("gravityData"))
         )
 
         list.forEach { (table, data) ->
-            FirebaseDataSaver.saveData(
-                table = table,
-                data = data
-            )
+            FirebaseDataSaver.saveData(data, table)
         }
     }
 }

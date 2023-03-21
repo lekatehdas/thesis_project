@@ -7,6 +7,10 @@ class DataHolder {
         bitLists[name] = mutableListOf()
     }
 
+    fun initializeLists(names: Collection<String>) {
+        names.forEach { name -> initializeList(name) }
+    }
+
     fun addToList(name: String, value: Boolean) {
         if (bitLists[name] == null)
             return
@@ -18,26 +22,12 @@ class DataHolder {
         return bitListToString(bitLists[name]?.take(Constants.DESIRED_LENGTH) ?: listOf())
     }
 
-    fun getAllLists(): List<String> {
-        return bitLists.values.map { bitListToString(it.take(Constants.DESIRED_LENGTH)) }
-    }
-
     fun resetData() {
         bitLists.forEach { (name, _) -> bitLists[name] = mutableListOf() }
     }
 
     fun getSizeOfSmallestList(): Int {
         return if (bitLists.isEmpty()) 0 else bitLists.values.minByOrNull { it.size }?.size ?: 0
-    }
-
-    fun getSizeOfAList(name: String): Int {
-        return bitLists[name]?.size ?: 0
-    }
-
-    fun getArraysContainingTextSlicedToDesiredLength(text: String): List<String> {
-        return bitLists.filterKeys { it.contains(text) }
-            .values
-            .map { bitListToString(it.take(Constants.DESIRED_LENGTH)) }
     }
 
     fun getListSizeContainingText(text: String): Int {

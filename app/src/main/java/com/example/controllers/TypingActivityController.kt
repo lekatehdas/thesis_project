@@ -3,7 +3,7 @@ package com.example.controllers
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
-import com.example.data_processors.LeastSignificantBitExtractor
+import com.example.data_processors.LsbExtractor
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
 import com.example.utilities.FirebaseDataSaver
@@ -34,11 +34,12 @@ class TypingActivityController(
                     resetUi()
 
                 } else {
-                    val timeLong = System.nanoTime()
-                    val timeBit = LeastSignificantBitExtractor.extract(timeLong)
+                    val timeLong = System.currentTimeMillis()
+                    val timeBit = LsbExtractor.long(timeLong)
+
 
                     val char = s[start + count - 1]
-                    val charBit = LeastSignificantBitExtractor.extract(char)
+                    val charBit = LsbExtractor.char(char)
 
                     dataHolder.addToList(keystroke, charBit)
                     dataHolder.addToList(time, timeBit)

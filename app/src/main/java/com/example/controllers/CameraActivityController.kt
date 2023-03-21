@@ -2,7 +2,7 @@ package com.example.controllers
 
 import android.app.Activity
 import com.example.data_gatherers.CameraDataGatherer
-import com.example.data_processors.LeastSignificantBitExtractor
+import com.example.data_processors.LsbExtractor
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
@@ -31,7 +31,7 @@ class CameraActivityController(
     }
 
     private fun onImageData(imageData: Long) {
-        val imageBit = LeastSignificantBitExtractor.extract(imageData)
+        val imageBit = LsbExtractor.long(imageData)
 
         dataHolder.addToList(camera, imageBit)
 
