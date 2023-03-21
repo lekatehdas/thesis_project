@@ -9,9 +9,9 @@ object SensorDataProcessor {
         val values: FloatArray = event.values
 
         val byteList: List<ByteArray> = ListToByteArrayListConverter.convertFloatList(values.toList())
-        val distilledBytesList = distillByteArrays(byteList)
+        val distilledBytes = distillByteArrays(byteList)
 
-        return ListDataProcessor.combineByteArraysByXOR(distilledBytesList)
+        return ListDataProcessor.combineByteArraysByXOR(distilledBytes)
     }
 
     private fun distillByteArrays(byteArrays: List<ByteArray>): List<ByteArray> {

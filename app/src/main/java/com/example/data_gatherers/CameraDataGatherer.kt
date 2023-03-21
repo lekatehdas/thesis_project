@@ -88,6 +88,8 @@ class CameraDataGatherer(
             image.close()
         }
 
+        private fun getFractionalPartAsLong(data: String) = data.split(".")[1].toLong()
+
         private fun getAverageValueOfTheFrame(image: ImageProxy): String {
             val buffer = image.planes[0].buffer
             val data = buffer.toByteArray()
