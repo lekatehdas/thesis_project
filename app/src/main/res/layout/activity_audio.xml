@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NetworkActivity">
+    tools:context=".AudioActivity">
 
     <TextView
-        android:id="@+id/txtNetwork"
+        android:id="@+id/txtAudio"
         android:layout_width="285dp"
         android:layout_height="129dp"
         android:layout_marginTop="32dp"
-        android:text="Press START to monitor the network traffic size. This will only check the volume of the traffic in certai nintervals. This method requires an active internet connection."
+        android:text="Press Start o gather audio data. This method will use devices microphone to do this."
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ToggleButton
-        android:id="@+id/btnNetworkStart"
+        android:id="@+id/btnAudioStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -29,10 +29,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progressBarNetwork" />
+        app:layout_constraintTop_toBottomOf="@+id/progressBarAudio" />
 
     <ProgressBar
-        android:id="@+id/progressBarNetwork"
+        android:id="@+id/progressBarAudio"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="200dp"
         android:layout_height="30dp"
@@ -40,15 +40,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtNetwork" />
+        app:layout_constraintTop_toBottomOf="@+id/txtAudio" />
 
     <TextView
-        android:id="@+id/txtNetworkPercent"
+        android:id="@+id/txtAudioPercent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="0%"
-        app:layout_constraintBottom_toBottomOf="@+id/progressBarNetwork"
-        app:layout_constraintStart_toEndOf="@+id/progressBarNetwork"
-        app:layout_constraintTop_toTopOf="@+id/progressBarNetwork" />
+        app:layout_constraintBottom_toBottomOf="@+id/progressBarAudio"
+        app:layout_constraintStart_toEndOf="@+id/progressBarAudio"
+        app:layout_constraintTop_toTopOf="@+id/progressBarAudio" />
 </androidx.constraintlayout.widget.ConstraintLayout>

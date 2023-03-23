@@ -9,15 +9,15 @@ import com.example.utilities.*
 
 class TypingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTypeingBinding
-    private val keystroke = "keystrokeData"
-    private val time = "timeData"
+    private val keystroke = "keystroke"
+    private val time = "time"
 
     private val sources = listOf(
         keystroke,
         time
     )
 
-    private lateinit var dataHolder: DataHolder
+    private lateinit var dataHolder: DataHolder<Long>
     private lateinit var collector: TypingActivityController
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,21 +29,28 @@ class TypingActivity : AppCompatActivity() {
         initDataHolder()
         initCollector()
         collector.start()
-        }
+    }
 
     private fun initCollector() {
-        collector = TypingActivityController(dataHolder, sources, ::updateUiElements, ::resetUiElements, binding.editTxtTimeTyping)
+        collector = TypingActivityController(
+            this,
+            dataHolder,
+            sources,
+            ::updateUiElements,
+            ::resetUiElements,
+            binding.editTxtTimeTyping
+        )
     }
 
     private fun initDataHolder() {
         dataHolder = DataHolder()
         for (name in sources)
-            dataHolder.initializeArray(name)
+            dataHolder.createList(name)
     }
 
     @SuppressLint("SetTextI18n")
     fun updateUiElements() {
-        binding.progressBarTimeTyping.progress = dataHolder.getSizeOfSmallestArray()
+        binding.progressBarTimeTyping.progress = dataHolder.getMinListSize()
 
         val percentage =
             (binding.progressBarTimeTyping.progress.toFloat() / binding.progressBarTimeTyping.max.toFloat()) * 100

@@ -11,14 +11,12 @@ import com.example.utilities.DataHolder
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
     private val camera = "cameraData"
-    private val audio = "audioData"
 
     private val sources = listOf(
-        camera,
-        audio
+        camera
     )
 
-    private lateinit var dataHolder: DataHolder
+    private lateinit var dataHolder: DataHolder<Map<String, String>>
     private lateinit var collector: CameraActivityController
 
 
@@ -27,7 +25,7 @@ class CameraActivity : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.progressBarCamera.max = Constants.DESIRED_LENGTH
+        binding.progressBarCamera.max = Constants.DESIRED_LENGTH_CAMERA
 
         initDataHolder()
         initCollector()
@@ -48,7 +46,7 @@ class CameraActivity : AppCompatActivity() {
     private fun initDataHolder() {
         dataHolder = DataHolder()
         for (name in sources)
-            dataHolder.initializeArray(name)
+            dataHolder.createList(name)
     }
 
     private fun initListeners() {
@@ -65,12 +63,12 @@ class CameraActivity : AppCompatActivity() {
     private suspend fun resetUiElements() {
         binding.progressBarCamera.progress = 0
         binding.txtCameraBarPercent.text = "0%"
-        binding.btnCameraStart.isChecked = false
+//        binding.btnCameraStart.isChecked = false // TODO this is disabled for infinite loop, helping the data gathering
     }
 
     @SuppressLint("SetTextI18n")
     private suspend fun updateProgressInUi() {
-        binding.progressBarCamera.progress = dataHolder.getSizeOfSmallestArray()
+        binding.progressBarCamera.progress = dataHolder.getMinListSize()
 
         val percentage =
             (binding.progressBarCamera.progress.toFloat() / binding.progressBarCamera.max.toFloat()) * 100

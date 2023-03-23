@@ -35,14 +35,14 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        binding.btnSpeech.setOnClickListener {
-            val intent = Intent(this, SpeechToTextActivity::class.java)
+        binding.btnAudio.setOnClickListener {
+            val intent = Intent(this, AudioActivity::class.java)
             startActivity(intent)
         }
 
-        binding.btnNetwork.setOnClickListener {
-            val intent = Intent(this, NetworkActivity::class.java)
-            startActivity(intent)
-        }
+//        binding.btnSpeech.setOnClickListener {
+//            val intent = Intent(this, SpeechToTextActivity::class.java)
+//            startActivity(intent)
+//        }
     }
 }

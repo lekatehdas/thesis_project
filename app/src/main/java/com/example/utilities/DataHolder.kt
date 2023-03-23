@@ -1,47 +1,44 @@
 package com.example.utilities
 
-class DataHolder {
-    private val byteArrays: MutableMap<String, ByteArray> = mutableMapOf()
+class DataHolder<T> {
+    private val dataMap: MutableMap<String, MutableList<T>> = mutableMapOf()
 
-    fun initializeArray(name: String) {
-        byteArrays[name] = ByteArray(0)
+    fun createList(name: String) {
+        dataMap[name] = mutableListOf()
     }
 
-    fun concatArray(name: String, byteArray: ByteArray) {
-        if (byteArrays[name] == null)
+    fun addElementToList(name: String, data: T) {
+        if (dataMap[name] == null)
             return
 
-        byteArrays[name] = byteArrays[name]!! + byteArray
+        dataMap[name]?.add(data)
     }
 
-    fun getArray(name: String): ByteArray {
-        return byteArrays[name]?.sliceArray(0 until Constants.DESIRED_LENGTH) ?: return ByteArray(0)
+    fun getListByName(name: String): List<T> {
+        return dataMap[name]?.toList() ?: emptyList()
     }
 
-    fun getAllArrays(): List<ByteArray> {
-        return byteArrays.values.map { it.sliceArray(0 until Constants.DESIRED_LENGTH) }
+    fun clearAllLists() {
+        dataMap.forEach { (name, _) -> dataMap[name] = mutableListOf() }
     }
 
-    fun resetData() {
-        byteArrays.forEach { (name, _) -> byteArrays[name] = ByteArray(0) }
+    fun clearList(name: String) {
+        dataMap[name] = mutableListOf()
     }
 
-    fun getSizeOfSmallestArray(): Int {
-        return if (byteArrays.isEmpty()) { 0 } else { byteArrays.values.minBy { it.size }.size }
+    fun getMinListSize(): Int {
+        return dataMap.values.minOfOrNull { it.size } ?: 0
     }
 
-    fun getSizeOfAnArray(name: String): Int {
-        return if (byteArrays[name] == null) { 0 } else { byteArrays[name]!!.size }
+    fun getListSize(name: String): Int {
+        return dataMap[name]?.size ?: 0
     }
 
-    fun getArraysContainingTextSlicedToDesiredLength(text: String): List<ByteArray> {
-        return byteArrays.filterKeys { it.contains(text) }
-            .values
-            .map { it.sliceArray(0 until Constants.DESIRED_LENGTH) }
+    fun hasKey(name: String): Boolean {
+        return dataMap.containsKey(name)
     }
-    fun getArraysContainingText(text: String): List<ByteArray> {
-        return byteArrays.filterKeys { it.contains(text) }
-            .values
-            .toList()
+
+    fun getAllKeys(): Set<String> {
+        return dataMap.keys
     }
 }

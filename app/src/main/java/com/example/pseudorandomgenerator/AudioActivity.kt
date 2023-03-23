@@ -1,46 +1,38 @@
 package com.example.pseudorandomgenerator
 
+import AudioActivityController
 import android.annotation.SuppressLint
-import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.controllers.NetworkActivityController
-import com.example.pseudorandomgenerator.databinding.ActivityNetworkBinding
+import com.example.pseudorandomgenerator.databinding.ActivityAudioBinding
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
 import kotlinx.coroutines.*
 
-class NetworkActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityNetworkBinding
-    private val network = "networkData"
+class AudioActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityAudioBinding
+    private val audio = "audio"
 
-    private lateinit var dataHolder: DataHolder
-    private val sources = listOf(network)
+    private lateinit var dataHolder: DataHolder<ByteArray>
 
-    private lateinit var collector: NetworkActivityController
+    private lateinit var collector: AudioActivityController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityNetworkBinding.inflate(layoutInflater)
+        binding = ActivityAudioBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (!hasInternetConnection()) {
-            Toast.makeText(this, "No internet available", Toast.LENGTH_SHORT).show()
-            this.finish()
-        }
-
-        binding.progressBarNetwork.max = Constants.DESIRED_LENGTH
+        binding.progressBarAudio.max = Constants.DESIRED_LENGTH
         initDataHolder()
         initCollector()
         initListeners()
     }
 
     private fun initCollector() {
-        collector = NetworkActivityController(
+        collector = AudioActivityController(
+            this,
             dataHolder,
-            network,
+            audio,
             ::updateProgressInUi,
             ::resetUiElements
         )
@@ -48,46 +40,36 @@ class NetworkActivity : AppCompatActivity() {
 
     private fun initDataHolder() {
         dataHolder = DataHolder()
-        for (name in sources)
-            dataHolder.initializeArray(name)
+        dataHolder.createList(audio)
     }
 
     @SuppressLint("SetTextI18n")
     private fun initListeners() {
-        binding.btnNetworkStart.setOnCheckedChangeListener { _, isChecked ->
+        binding.btnAudioStart.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked)
-                collector.start()
+                CoroutineScope(Dispatchers.Main).launch {
+                    collector.start()
+                }
             if (!isChecked)
                 collector.stop()
         }
     }
 
-    private fun hasInternetConnection(): Boolean {
-        val connectivityManager = this.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: NetworkInfo? = connectivityManager.activeNetworkInfo
-        return activeNetwork?.isConnectedOrConnecting == true
-    }
-
     @SuppressLint("SetTextI18n")
     private suspend fun resetUiElements() {
-        withContext(Dispatchers.Main) {
-            binding.progressBarNetwork.progress = 0
-            binding.txtNetworkPercent.text = "0%"
-            binding.btnNetworkStart.text = "START"
-            binding.btnNetworkStart.isChecked = false
-        }
-
+        binding.progressBarAudio.progress = 0
+        binding.txtAudioPercent.text = "0%"
+        binding.btnAudioStart.text = "START"
+        binding.btnAudioStart.isChecked = false //TODO commented out for infinite loop.
     }
 
     @SuppressLint("SetTextI18n")
     private suspend fun updateProgressInUi() {
-        withContext(Dispatchers.Main) {
-            binding.progressBarNetwork.progress = dataHolder.getSizeOfSmallestArray()
+        binding.progressBarAudio.progress = dataHolder.getMinListSize()
 
-            val percentage = (
-                    binding.progressBarNetwork.progress.toFloat() /
-                            binding.progressBarNetwork.max.toFloat()) * 100
-            binding.txtNetworkPercent.text = "${percentage.toInt()}%"
-        }
+        val percentage = (
+                binding.progressBarAudio.progress.toFloat() /
+                        binding.progressBarAudio.max.toFloat()) * 100
+        binding.txtAudioPercent.text = "${percentage.toInt()}%"
     }
 }

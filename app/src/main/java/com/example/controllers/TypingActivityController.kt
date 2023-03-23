@@ -1,18 +1,19 @@
 package com.example.controllers
 
+import android.content.ContentValues
+import android.content.Context
+import android.os.Environment
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
-import com.example.converters.ByteArrayToBinaryStringConverter
-import com.example.data_processors.ListDataProcessor
-import com.example.data_processors.LongDataProcessor
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
-import com.example.utilities.FirebaseDataSaver
-import java.math.BigInteger
+import java.io.OutputStreamWriter
 
 class TypingActivityController(
-    private val dataHolder: DataHolder,
+    private val context: Context,
+    private val dataHolder: DataHolder<Long>,
     private val sources: List<String>,
     private val updateUi: () -> Unit,
     private val resetUi: () -> Unit,
@@ -21,6 +22,7 @@ class TypingActivityController(
 
     private val keystroke = sources[0]
     private val time = sources[1]
+
     fun start() {
         binding.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
@@ -31,24 +33,22 @@ class TypingActivityController(
                     return
                 }
 
-                if (dataHolder.getSizeOfSmallestArray() >= Constants.DESIRED_LENGTH) {
+                if (dataHolder.getMinListSize() >= Constants.DESIRED_LENGTH) {
                     saveData()
-                    dataHolder.resetData()
+                    dataHolder.clearAllLists()
                     resetUi()
 
                 } else {
-                    val timeLong = System.nanoTime()
-                    val timeByte = LongDataProcessor.getLeastSignificantByte(timeLong)
+                    val timeStamp = System.nanoTime()
 
-                    if (dataHolder.getSizeOfAnArray(keystroke) < Constants.DESIRED_LENGTH) {
-                        val char = s[start + count - 1].toString().toByteArray()
-                        val scrambleChar = scrambleChar(char, timeByte)
+                    if (dataHolder.getListSize(keystroke) < Constants.DESIRED_LENGTH) {
+                        val char = s[start + count - 1].code.toLong()
 
-                        dataHolder.concatArray(keystroke, scrambleChar)
+                        dataHolder.addElementToList(keystroke, char)
                     }
 
-                    if (dataHolder.getSizeOfAnArray(time) < Constants.DESIRED_LENGTH)
-                        dataHolder.concatArray(time, timeByte)
+                    if (dataHolder.getListSize(time) < Constants.DESIRED_LENGTH)
+                        dataHolder.addElementToList(time, timeStamp)
 
                 }
 
@@ -58,29 +58,28 @@ class TypingActivityController(
     }
 
     private fun saveData() {
-        val lists = dataHolder.getAllArrays()
-
-        val result = ListDataProcessor.combineByteArraysByXOR(lists)
-        val string = ByteArrayToBinaryStringConverter.convert(result)
-
-        FirebaseDataSaver.saveData(
-            data = string,
-            table = "typing"
-        )
-
-        FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(keystroke)),
-            table = "typing_keystroke_alone"
-        )
-
-        FirebaseDataSaver.saveData(
-            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(time)),
-            table = "typing_time_alone"
-        )
+        saveListData(keystroke, "Typing")
+        saveListData(time, "Time")
     }
 
-    private fun scrambleChar(char: ByteArray, time: ByteArray): ByteArray {
-        val result = (BigInteger(time) + BigInteger(char)) % Constants.PRIME_FOR_MOD.toBigInteger()
-        return result.toByteArray()
+    private fun saveListData(listName: String, folderName: String) {
+        val sensorData = dataHolder.getListByName(listName) ?: return
+        val fileName = "${System.currentTimeMillis()}.csv"
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Files.FileColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.Files.FileColumns.MIME_TYPE, "text/csv")
+            put(MediaStore.Files.FileColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOCUMENTS}/Thesis/$folderName/")
+        }
+
+        val uri = context.contentResolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
+        uri?.let {
+            context.contentResolver.openOutputStream(uri).use { outputStream ->
+                val writer = OutputStreamWriter(outputStream)
+                sensorData.forEach { value ->
+                    writer.write("$value\n")
+                }
+                writer.flush()
+            }
+        }
     }
 }
