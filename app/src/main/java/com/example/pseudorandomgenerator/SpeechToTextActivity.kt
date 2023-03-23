@@ -46,7 +46,7 @@
 //    private fun initDataHolder() {
 //        dataHolder = DataHolder()
 //        for (name in sources)
-//            dataHolder.initializeList(name)
+//            dataHolder.initializeArray(name)
 //    }
 //
 //    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -78,11 +78,11 @@
 //        do { data = combineAndHalveByteArray(data) }
 //        while (data.size > Constants.DESIRED_LENGTH * 2)
 //
-//        dataHolder.addToList(dataArrayName, data)
+//        dataHolder.concatArray(dataArrayName, data)
 //    }
 //
 //    private fun saveData() {
-//        val lists = dataHolder.getAllLists()
+//        val lists = dataHolder.getAllArrays()
 //
 //        val xor = ListDataProcessor.combineByteArraysByXOR(lists)
 //        val result = ByteArrayToBinaryStringConverter.convert(xor)
@@ -93,17 +93,17 @@
 //        )
 //
 //        FirebaseDataSaver.saveData(
-//            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getList(audio)),
+//            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(audio)),
 //            table = "speech_audio_alone"
 //        )
 //
 //        FirebaseDataSaver.saveData(
-//            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getList(speech)),
+//            data = ByteArrayToBinaryStringConverter.convert(dataHolder.getArray(speech)),
 //            table = "speech_text_alone"
 //        )
 //    }
 //
-//    private fun enoughDataFor(name: String) = dataHolder.getSizeOfAList(name) >= Constants.DESIRED_LENGTH
+//    private fun enoughDataFor(name: String) = dataHolder.getSizeOfAnArray(name) >= Constants.DESIRED_LENGTH
 //
 //    private fun resetData() {
 //        dataHolder.resetData()
@@ -116,7 +116,7 @@
 //
 //    @SuppressLint("SetTextI18n")
 //    private fun updateUiElements() {
-//        binding.progressBarSpeech.progress = dataHolder.getSizeOfSmallestList()
+//        binding.progressBarSpeech.progress = dataHolder.getSizeOfSmallestArray()
 //
 //        val percentage =
 //            (binding.progressBarSpeech.progress.toFloat() / binding.progressBarSpeech.max.toFloat()) * 100
@@ -124,6 +124,6 @@
 //    }
 //
 //    private fun enoughData(): Boolean {
-//        return dataHolder.getSizeOfSmallestList() >= Constants.DESIRED_LENGTH
+//        return dataHolder.getSizeOfSmallestArray() >= Constants.DESIRED_LENGTH
 //    }
 //}

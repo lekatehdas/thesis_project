@@ -10,21 +10,23 @@ class MovementDataGatherer(
     private val context: Context,
     private val onData: (SensorEvent) -> Unit
 ) : SensorEventListener {
-
-    private val sensorManager: SensorManager by lazy { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
-    private val sensors = mutableMapOf<Int, Sensor?>()
-
-    init {
-        initSensors()
+    private val sensorManager: SensorManager by lazy {
+        context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
 
-    fun start() {
-        registerListeners()
+    private val sensorMap: Map<Int, Sensor?> by lazy {
+        listOf(
+            Sensor.TYPE_ACCELEROMETER,
+            Sensor.TYPE_GYROSCOPE,
+            Sensor.TYPE_MAGNETIC_FIELD,
+            Sensor.TYPE_ROTATION_VECTOR,
+            Sensor.TYPE_GRAVITY
+        ).associateWith { sensorManager.getDefaultSensor(it) }
     }
 
-    fun stop() {
-        unregisterListeners()
-    }
+    fun start() = registerListeners()
+
+    fun stop() = unregisterAllListeners()
 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let { onData(it) }
@@ -33,28 +35,17 @@ class MovementDataGatherer(
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     fun unregisterSensor(sensor: Sensor) {
-        sensors[sensor.type]?.let { sensorManager.unregisterListener(this, it) }
+        sensorManager.unregisterListener(this, sensorMap[sensor.type])
     }
 
-    private fun initSensors() {
-        val sensorTypes = listOf(
-            Sensor.TYPE_GYROSCOPE,
-            Sensor.TYPE_ACCELEROMETER,
-            Sensor.TYPE_MAGNETIC_FIELD,
-            Sensor.TYPE_ROTATION_VECTOR,
-            Sensor.TYPE_GRAVITY
-        )
-
-        sensorTypes.forEach { type -> sensors[type] = sensorManager.getDefaultSensor(type) }
-    }
 
     private fun registerListeners() {
-        sensors.forEach { (type, sensor) ->
-            sensor?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) }
+        sensorMap.forEach { (type, sensor) ->
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
 
-    private fun unregisterListeners() {
+    private fun unregisterAllListeners() {
         sensorManager.unregisterListener(this)
     }
 }

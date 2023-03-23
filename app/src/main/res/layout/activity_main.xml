@@ -64,11 +64,11 @@
         app:layout_constraintTop_toBottomOf="@+id/btnCamera" />
 
     <Button
-        android:id="@+id/btnNetwork"
+        android:id="@+id/btnAudio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="NETWORK"
+        android:text="Audio"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"

@@ -17,7 +17,7 @@ import kotlin.reflect.KFunction1
 class CameraDataGatherer(
     private val activity: Activity,
     private val binding: ActivityCameraBinding,
-    private val exportData: KFunction1<Long, Unit>
+    private val exportData: KFunction1<ImageProxy, Unit>
 ) {
 
     private var cameraExecutor = Executors.newSingleThreadExecutor()
@@ -81,9 +81,8 @@ class CameraDataGatherer(
     inner class ImageAnalyzer : ImageAnalysis.Analyzer {
         @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
         override fun analyze(image: ImageProxy) {
-            val average = getAverageValueOfTheFrame(image)
 
-            exportData(average)
+            exportData(image)
 
             image.close()
         }

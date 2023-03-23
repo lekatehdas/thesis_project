@@ -1,42 +1,44 @@
 package com.example.utilities
 
-class DataHolder {
-    private val bitLists: MutableMap<String, MutableList<Boolean>> = mutableMapOf()
+class DataHolder<T> {
+    private val dataMap: MutableMap<String, MutableList<T>> = mutableMapOf()
 
-    fun initializeList(name: String) {
-        bitLists[name] = mutableListOf()
+    fun createList(name: String) {
+        dataMap[name] = mutableListOf()
     }
 
-    fun initializeLists(names: Collection<String>) {
-        names.forEach { name -> initializeList(name) }
-    }
-
-    fun addToList(name: String, value: Boolean) {
-        if (bitLists[name] == null)
+    fun addElementToList(name: String, data: T) {
+        if (dataMap[name] == null)
             return
 
-        bitLists[name]!!.add(value)
+        dataMap[name]?.add(data)
     }
 
-    fun getList(name: String): String {
-        return bitListToString(bitLists[name]?.take(Constants.DESIRED_LENGTH) ?: listOf())
+    fun getListByName(name: String): List<T> {
+        return dataMap[name]?.toList() ?: emptyList()
     }
 
-    fun resetData() {
-        bitLists.forEach { (name, _) -> bitLists[name] = mutableListOf() }
+    fun clearAllLists() {
+        dataMap.forEach { (name, _) -> dataMap[name] = mutableListOf() }
     }
 
-    fun getSizeOfSmallestList(): Int {
-        return if (bitLists.isEmpty()) 0 else bitLists.values.minByOrNull { it.size }?.size ?: 0
+    fun clearList(name: String) {
+        dataMap[name] = mutableListOf()
     }
 
-    fun getListSizeContainingText(text: String): Int {
-        return bitLists.filterKeys { it.contains(text) }
-            .values
-            .size
+    fun getMinListSize(): Int {
+        return dataMap.values.minOfOrNull { it.size } ?: 0
     }
 
-    private fun bitListToString(bitList: List<Boolean>): String {
-        return bitList.joinToString(separator = "") { if (it) "1" else "0" }
+    fun getListSize(name: String): Int {
+        return dataMap[name]?.size ?: 0
+    }
+
+    fun hasKey(name: String): Boolean {
+        return dataMap.containsKey(name)
+    }
+
+    fun getAllKeys(): Set<String> {
+        return dataMap.keys
     }
 }

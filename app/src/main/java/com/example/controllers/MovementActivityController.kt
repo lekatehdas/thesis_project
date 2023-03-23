@@ -1,92 +1,94 @@
 package com.example.controllers
 
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
+import android.os.Environment
+import android.provider.MediaStore
 import com.example.data_gatherers.MovementDataGatherer
-import com.example.data_processors.LsbExtractor
-import com.example.data_processors.SensorDataProcessor
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
-import com.example.utilities.FirebaseDataSaver
 import kotlinx.coroutines.runBlocking
+import java.io.OutputStreamWriter
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
 
 class MovementActivityController(
     private val context: Context,
     private val updateUi: suspend (Int) -> Unit,
     private val resetUi: suspend () -> Unit
-) {
+) : CoroutineScope by CoroutineScope(Dispatchers.Default) {
 
-    private val dataHolder = DataHolder()
     private val gatherer = MovementDataGatherer(context, ::onData)
-
-    private val sensorSources = mapOf(
-        Sensor.TYPE_ACCELEROMETER to "accelerationData",
-        Sensor.TYPE_ROTATION_VECTOR to "rotationData",
-        Sensor.TYPE_MAGNETIC_FIELD to "magnetometerData",
-        Sensor.TYPE_GYROSCOPE to "gyroscopeData",
-        Sensor.TYPE_GRAVITY to "gravityData"
-    )
-
-    init {
-        dataHolder.initializeLists(sensorSources.values)
-    }
+    private val sensorDataHolder = DataHolder<FloatArray>()
+    private val desiredLength = Constants.DESIRED_LENGTH
 
     fun start() {
         gatherer.start()
     }
 
     private fun onData(event: SensorEvent) {
-        val sensorType = event.sensor.type
-        val sensorName = sensorSources[sensorType] ?: return
+        launch {
+            val sensorName = event.sensor.getSensorName() ?: return@launch
 
-        if (dataHolder.getSizeOfSmallestList() >= Constants.DESIRED_LENGTH) {
-            processFullData()
-        } else {
-            sensorDataHandler(sensorName, event)
+            if (!sensorDataHolder.hasKey(sensorName)) {
+                sensorDataHolder.createList(sensorName)
+            }
+
+            sensorDataHolder.addElementToList(sensorName, event.values.copyOf())
+
+            if (sensorDataHolder.getListSize(sensorName) == desiredLength) {
+                gatherer.unregisterSensor(event.sensor)
+                saveData(event.sensor.type, sensorDataHolder.getListByName(sensorName).toMutableList())
+            }
+
+            if (sensorDataHolder.getAllKeys().all { key -> sensorDataHolder.getListSize(key) >= desiredLength }) {
+                gatherer.start()
+                sensorDataHolder.clearAllLists()
+                (context as Activity).runOnUiThread { runBlocking { resetUi() } }
+            }
+
+            (context as Activity).runOnUiThread { runBlocking { updateUi(sensorDataHolder.getMinListSize()) } }
         }
     }
 
-    private fun sensorDataHandler(sensorName: String, event: SensorEvent) {
-        if (enoughData(dataHolder.getListSizeContainingText(sensorName))) {
-            gatherer.unregisterSensor(event.sensor)
-        } else {
-            addToDataHolder(sensorName, event)
-            (context as Activity).runOnUiThread { runBlocking { updateUi(dataHolder.getSizeOfSmallestList()) } }
-        }
+    private fun Sensor.getSensorName(): String? = when (type) {
+        Sensor.TYPE_ACCELEROMETER -> "accelerationData"
+        Sensor.TYPE_GYROSCOPE -> "gyroscopeData"
+        Sensor.TYPE_MAGNETIC_FIELD -> "magnetometerData"
+        Sensor.TYPE_ROTATION_VECTOR -> "rotationData"
+        Sensor.TYPE_GRAVITY -> "gravityData"
+        else -> null
     }
 
-    private fun addToDataHolder(sensorName: String, event: SensorEvent) {
-        val longNumber = SensorDataProcessor.xorToSingleNumber(event)
-        val bit = LsbExtractor.long(longNumber)
-        dataHolder.addToList(sensorName, bit)
-    }
+    private fun saveData(sensorType: Int, sensorData: MutableList<FloatArray>) {
+        try {
+            val fileName = "${System.currentTimeMillis()}.csv"
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Files.FileColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.Files.FileColumns.MIME_TYPE, "text/csv")
+                put(MediaStore.Files.FileColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOCUMENTS}/Thesis/Movement/$sensorType/")
+            }
 
-    private fun enoughData(size: Int): Boolean {
-        return size >= Constants.DESIRED_LENGTH
-    }
-
-    private fun processFullData() {
-        gatherer.stop()
-        saveData()
-        dataHolder.resetData()
-
-        (context as Activity).runOnUiThread { runBlocking { resetUi() } }
-        gatherer.start() //TODO This is only for infinite loop, to make the data generating easier.
-    }
-
-    private fun saveData() {
-        val list = listOf(
-            Pair("movement_acceleration", dataHolder.getList("accelerationData")),
-            Pair("movement_gyroscope", dataHolder.getList("gyroscopeData")),
-            Pair("movement_magnetometer", dataHolder.getList("magnetometerData")),
-            Pair("movement_rotation", dataHolder.getList("rotationData")),
-            Pair("movement_gravity", dataHolder.getList("gravityData"))
-        )
-
-        list.forEach { (table, data) ->
-            FirebaseDataSaver.saveData(data, table)
+            val uri = context.contentResolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
+            uri?.let {
+                context.contentResolver.openOutputStream(uri).use { outputStream ->
+                    val writer = OutputStreamWriter(outputStream)
+                    sensorData.forEach { event ->
+                        if (event != null) {
+                            writer.write(event.joinToString(","))
+                            writer.write("\n")
+                        }
+                    }
+                    writer.flush()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }
