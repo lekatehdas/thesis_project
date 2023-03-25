@@ -8,6 +8,7 @@ import com.example.utilities.PermissionHelper
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -20,29 +21,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initListeners() {
-        binding.btnTyping.setOnClickListener {
-            val intent = Intent(this, TypingActivity::class.java)
-            startActivity(intent)
-        }
+        binding.btnTyping.setOnClickListener { startActivity(TypingActivity::class.java) }
+        binding.btnCamera.setOnClickListener { startActivity(CameraActivity::class.java) }
+        binding.btnMovement.setOnClickListener { startActivity(MovementActivity::class.java) }
+        binding.btnAudio.setOnClickListener { startActivity(AudioActivity::class.java) }
+        binding.btnSpeech.setOnClickListener { startActivity(DrawActivity::class.java) }
+    }
 
-        binding.btnCamera.setOnClickListener {
-            val intent = Intent(this, CameraActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.btnMovement.setOnClickListener {
-            val intent = Intent(this, MovementActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.btnAudio.setOnClickListener {
-            val intent = Intent(this, AudioActivity::class.java)
-            startActivity(intent)
-        }
-
-//        binding.btnSpeech.setOnClickListener {
-//            val intent = Intent(this, SpeechToTextActivity::class.java)
-//            startActivity(intent)
-//        }
+    private fun startActivity(activityClass: Class<*>) {
+        val intent = Intent(this, activityClass)
+        startActivity(intent)
     }
 }

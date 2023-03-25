@@ -34,7 +34,7 @@
             android:name=".AudioActivity"
             android:exported="false" />
         <activity
-            android:name=".SpeechToTextActivity"
+            android:name=".DrawActivity"
             android:exported="false" />
         <activity
             android:name=".MovementActivity"

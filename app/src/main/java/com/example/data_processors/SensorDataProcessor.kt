@@ -1,6 +1,7 @@
 package com.example.data_processors
 
 import android.hardware.SensorEvent
+import kotlin.math.roundToLong
 
 object SensorDataProcessor {
     fun getDataAsString(event: SensorEvent): String {
@@ -9,7 +10,6 @@ object SensorDataProcessor {
 
         return product.toString()
     }
-     */
     fun xorToSingleNumber(event: SensorEvent): Long {
         val floatArray = event.values
         val longArray = floatArray.map { it.roundToLong() }

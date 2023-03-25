@@ -49,9 +49,6 @@ class TypingActivityController(
 
                     if (dataHolder.getListSize(time) < Constants.DESIRED_LENGTH)
                         dataHolder.addElementToList(time, timeStamp)
-
-                    dataHolder.addToList(keystroke, charBit)
-                    dataHolder.addToList(time, timeBit)
                 }
 
                 updateUi()
