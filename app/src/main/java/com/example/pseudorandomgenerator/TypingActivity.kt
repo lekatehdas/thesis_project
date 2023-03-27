@@ -6,6 +6,7 @@ import android.os.Bundle
 import com.example.controllers.TypingActivityController
 import com.example.pseudorandomgenerator.databinding.ActivityTypeingBinding
 import com.example.utilities.*
+import kotlinx.coroutines.runBlocking
 
 class TypingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTypeingBinding
@@ -28,7 +29,7 @@ class TypingActivity : AppCompatActivity() {
         binding.progressBarTimeTyping.max = Constants.DESIRED_LENGTH
         initDataHolder()
         initCollector()
-        collector.start()
+        runBlocking { collector.start() }
     }
 
     private fun initCollector() {
@@ -38,7 +39,7 @@ class TypingActivity : AppCompatActivity() {
             sources,
             ::updateUiElements,
             ::resetUiElements,
-            binding.editTxtTimeTyping
+            binding
         )
     }
 

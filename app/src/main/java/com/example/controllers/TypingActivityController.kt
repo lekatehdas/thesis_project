@@ -6,10 +6,12 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.EditText
+import com.example.pseudorandomgenerator.databinding.ActivityTypeingBinding
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
+import kotlinx.coroutines.*
 import java.io.OutputStreamWriter
+import kotlin.random.Random
 
 class TypingActivityController(
     private val context: Context,
@@ -17,14 +19,14 @@ class TypingActivityController(
     private val sources: List<String>,
     private val updateUi: () -> Unit,
     private val resetUi: () -> Unit,
-    private val binding: EditText
+    private val binding: ActivityTypeingBinding
 ) {
 
     private val keystroke = sources[0]
     private val time = sources[1]
 
     fun start() {
-        binding.addTextChangedListener(object : TextWatcher {
+        binding.editTxtTimeTyping.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -54,6 +56,32 @@ class TypingActivityController(
                 updateUi()
             }
         })
+
+        binding.toggleBtnAutoGenerate.setOnCheckedChangeListener {_, isChecked ->
+            if (isChecked) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    while (binding.toggleBtnAutoGenerate.isChecked) {
+                        val randomChar = getRandomCharacter()
+                        withContext(Dispatchers.Main) {
+                            binding.editTxtTimeTyping.text.append(randomChar)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun getRandomCharacter(): Char {
+        val lowercaseLetters = 'a'..'z'
+        val uppercaseLetters = 'A'..'Z'
+        val symbols = listOf('!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '{', '}', '|', ':', '<', '>', '?', '"')
+
+        val allCharacters = (lowercaseLetters + uppercaseLetters + symbols).toList()
+
+        // Add a random delay between 1 and 10 milliseconds
+        delay(Random.nextLong(1, 11))
+
+        return allCharacters[Random.nextInt(allCharacters.size)]
     }
 
     private fun saveData() {

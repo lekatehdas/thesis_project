@@ -1,16 +1,19 @@
 package com.example.pseudorandomgenerator
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import com.example.pseudorandomgenerator.databinding.ActivityDrawBinding
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
+import com.example.utilities.PointWithPressure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-data class PointWithPressure(val x: Float, val y: Float, val pressure: Float)
+import java.io.OutputStreamWriter
 
 class DrawActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDrawBinding
@@ -38,7 +41,7 @@ class DrawActivity : AppCompatActivity() {
         dataHolder.addElementToList("points", pointWithPressure)
 
         if (dataHolder.getListSize("points") >= Constants.DESIRED_LENGTH) {
-            saveData(dataHolder.getListByName("points"))
+            saveData()
             dataHolder.clearList("points")
 
             CoroutineScope(Dispatchers.Main).launch {
@@ -51,9 +54,32 @@ class DrawActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveData(points: List<PointWithPressure>?) {
-        // code for saving the points with pressure goes here
+    private fun saveData() {
+        try {
+            val fileName = "${System.currentTimeMillis()}.csv"
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Files.FileColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.Files.FileColumns.MIME_TYPE, "text/csv")
+                put(MediaStore.Files.FileColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOCUMENTS}/Thesis/Draw/")
+            }
+
+            val uri = contentResolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
+            uri?.let {
+                contentResolver.openOutputStream(uri).use { outputStream ->
+                    val writer = OutputStreamWriter(outputStream)
+                    val points = dataHolder.getListByName("points")
+                    points.forEach { point ->
+                        writer.write("${point.x},${point.y},${point.pressure}\n")
+                    }
+                    writer.flush()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
+
+
 
     @SuppressLint("SetTextI18n")
     private suspend fun resetUiElements() {

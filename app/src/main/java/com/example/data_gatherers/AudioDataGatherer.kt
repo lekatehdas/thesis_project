@@ -6,6 +6,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import androidx.core.app.ActivityCompat
+import com.example.converters.ByteArrayToBinaryStringConverter
 import com.example.utilities.Constants
 import com.example.utilities.PermissionHelper
 import kotlinx.coroutines.Dispatchers
@@ -29,13 +30,9 @@ class AudioDataGatherer(
                 AudioFormat.ENCODING_PCM_16BIT
             )
 
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
                 PermissionHelper(context as Activity).checkAndAskPermissions()
-            }
+
             audioRecorder = AudioRecord(
                 MediaRecorder.AudioSource.MIC,
                 Constants.SAMPLE_RATE,

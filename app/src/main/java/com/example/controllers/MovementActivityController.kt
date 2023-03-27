@@ -31,6 +31,7 @@ class MovementActivityController(
         gatherer.start()
     }
 
+    private var numUnregisteredSensors = 0
     private fun onData(event: SensorEvent) {
         launch {
             val sensorName = event.sensor.getSensorName() ?: return@launch
@@ -42,13 +43,18 @@ class MovementActivityController(
             sensorDataHolder.addElementToList(sensorName, event.values.copyOf())
 
             if (sensorDataHolder.getListSize(sensorName) == desiredLength) {
-                gatherer.unregisterSensor(event.sensor)
-                saveData(event.sensor.type, sensorDataHolder.getListByName(sensorName).toMutableList())
+                saveData(
+                    event.sensor.getSensorName()!!,
+                    sensorDataHolder.getListByName(sensorName).toMutableList()
+                )
+                numUnregisteredSensors++
+                gatherer.unregisterSensor(event.sensor.type)
             }
 
-            if (sensorDataHolder.getAllKeys().all { key -> sensorDataHolder.getListSize(key) >= desiredLength }) {
-                gatherer.start()
+            if (numUnregisteredSensors == sensorDataHolder.getAllKeys().size) {
                 sensorDataHolder.clearAllLists()
+                gatherer.start()
+                numUnregisteredSensors = 0
                 (context as Activity).runOnUiThread { runBlocking { resetUi() } }
             }
 
@@ -56,39 +62,46 @@ class MovementActivityController(
         }
     }
 
+
     private fun Sensor.getSensorName(): String? = when (type) {
-        Sensor.TYPE_ACCELEROMETER -> "accelerationData"
-        Sensor.TYPE_GYROSCOPE -> "gyroscopeData"
-        Sensor.TYPE_MAGNETIC_FIELD -> "magnetometerData"
-        Sensor.TYPE_ROTATION_VECTOR -> "rotationData"
-        Sensor.TYPE_GRAVITY -> "gravityData"
+        Sensor.TYPE_ACCELEROMETER -> "acceleration"
+        Sensor.TYPE_GYROSCOPE -> "gyroscope"
+        Sensor.TYPE_MAGNETIC_FIELD -> "magnetometer"
+        Sensor.TYPE_ROTATION_VECTOR -> "rotation"
+        Sensor.TYPE_GRAVITY -> "gravity"
         else -> null
     }
 
-    private fun saveData(sensorType: Int, sensorData: MutableList<FloatArray>) {
-        try {
-            val fileName = "${System.currentTimeMillis()}.csv"
-            val contentValues = ContentValues().apply {
-                put(MediaStore.Files.FileColumns.DISPLAY_NAME, fileName)
-                put(MediaStore.Files.FileColumns.MIME_TYPE, "text/csv")
-                put(MediaStore.Files.FileColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOCUMENTS}/Thesis/Movement/$sensorType/")
-            }
+    private fun saveData(sensorName: String, sensorData: MutableList<FloatArray>) {
+        launch(Dispatchers.IO) {
+            try {
+                val fileName = "${System.currentTimeMillis()}.csv"
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.Files.FileColumns.DISPLAY_NAME, fileName)
+                    put(MediaStore.Files.FileColumns.MIME_TYPE, "text/csv")
+                    put(
+                        MediaStore.Files.FileColumns.RELATIVE_PATH,
+                        "${Environment.DIRECTORY_DOCUMENTS}/Thesis/Movement/$sensorName/"
+                    )
+                }
 
-            val uri = context.contentResolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
-            uri?.let {
-                context.contentResolver.openOutputStream(uri).use { outputStream ->
-                    val writer = OutputStreamWriter(outputStream)
-                    sensorData.forEach { event ->
-                        if (event != null) {
+                val uri = context.contentResolver.insert(
+                    MediaStore.Files.getContentUri("external"),
+                    contentValues
+                )
+                uri?.let {
+                    context.contentResolver.openOutputStream(uri).use { outputStream ->
+                        val writer = OutputStreamWriter(outputStream)
+                        sensorData.forEach { event ->
                             writer.write(event.joinToString(","))
                             writer.write("\n")
                         }
+                        writer.flush()
                     }
-                    writer.flush()
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 }
