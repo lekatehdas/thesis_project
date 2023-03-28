@@ -10,19 +10,14 @@ import android.provider.MediaStore
 import com.example.data_gatherers.MovementDataGatherer
 import com.example.utilities.Constants
 import com.example.utilities.DataHolder
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.io.OutputStreamWriter
-
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.CoroutineScope
 
 class MovementActivityController(
     private val context: Context,
     private val updateUi: suspend (Int) -> Unit,
     private val resetUi: suspend () -> Unit
 ) : CoroutineScope by CoroutineScope(Dispatchers.Default) {
-
     private val gatherer = MovementDataGatherer(context, ::onData)
     private val sensorDataHolder = DataHolder<FloatArray>()
     private val desiredLength = Constants.DESIRED_LENGTH
@@ -33,35 +28,36 @@ class MovementActivityController(
 
     private var numUnregisteredSensors = 0
     private fun onData(event: SensorEvent) {
-        launch {
-            val sensorName = event.sensor.getSensorName() ?: return@launch
+        val dedicatedThread = gatherer.dedicatedThreads[event.sensor.type]
+        dedicatedThread?.let { coroutineContext ->
+            launch(coroutineContext) {
+                val sensorName = event.sensor.getSensorName() ?: return@launch
 
-            if (!sensorDataHolder.hasKey(sensorName)) {
-                sensorDataHolder.createList(sensorName)
+                if (!sensorDataHolder.hasKey(sensorName)) {
+                    sensorDataHolder.createList(sensorName)
+                }
+
+                sensorDataHolder.addElementToList(sensorName, event.values.copyOf())
+
+                if (sensorDataHolder.getListSize(sensorName) == desiredLength) {
+                    saveData(
+                        event.sensor.getSensorName()!!,
+                        sensorDataHolder.getListByName(sensorName).toMutableList()
+                    )
+                    numUnregisteredSensors++
+                    gatherer.unregisterSensor(event.sensor.type)
+                }
+                if (numUnregisteredSensors == sensorDataHolder.getAllKeys().size) {
+                    sensorDataHolder.clearAllLists()
+                    gatherer.start()
+                    numUnregisteredSensors = 0
+                    (context as Activity).runOnUiThread { runBlocking { resetUi() } }
+                }
+
+                (context as Activity).runOnUiThread { runBlocking { updateUi(sensorDataHolder.getMinListSize()) } }
             }
-
-            sensorDataHolder.addElementToList(sensorName, event.values.copyOf())
-
-            if (sensorDataHolder.getListSize(sensorName) == desiredLength) {
-                saveData(
-                    event.sensor.getSensorName()!!,
-                    sensorDataHolder.getListByName(sensorName).toMutableList()
-                )
-                numUnregisteredSensors++
-                gatherer.unregisterSensor(event.sensor.type)
-            }
-
-            if (numUnregisteredSensors == sensorDataHolder.getAllKeys().size) {
-                sensorDataHolder.clearAllLists()
-                gatherer.start()
-                numUnregisteredSensors = 0
-                (context as Activity).runOnUiThread { runBlocking { resetUi() } }
-            }
-
-            (context as Activity).runOnUiThread { runBlocking { updateUi(sensorDataHolder.getMinListSize()) } }
         }
     }
-
 
     private fun Sensor.getSensorName(): String? = when (type) {
         Sensor.TYPE_ACCELEROMETER -> "acceleration"
@@ -103,5 +99,10 @@ class MovementActivityController(
                 e.printStackTrace()
             }
         }
+    }
+
+    fun stop() {
+        gatherer.stop()
+        gatherer.closeDedicatedThreads()
     }
 }

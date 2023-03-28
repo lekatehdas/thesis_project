@@ -5,8 +5,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
 
 class MovementDataGatherer(
     private val context: Context,
@@ -15,9 +15,6 @@ class MovementDataGatherer(
     private val sensorManager: SensorManager by lazy {
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
-
-    private val executorService: ExecutorService = Executors.newFixedThreadPool(5)
-
     private val sensorTypes = listOf(
         Sensor.TYPE_ACCELEROMETER,
         Sensor.TYPE_GYROSCOPE,
@@ -26,13 +23,18 @@ class MovementDataGatherer(
         Sensor.TYPE_GRAVITY
     )
 
-    private val sensorEventListeners = sensorTypes.map { createSensorEventListener() }
+    private val sensorEventListener = createSensorEventListener()
+
+    @OptIn(DelicateCoroutinesApi::class)
+    val dedicatedThreads: Map<Int, CoroutineContext> = sensorTypes.associateWith { type ->
+        newSingleThreadContext("SensorThread-$type")
+    }
 
     private fun createSensorEventListener(): SensorEventListener {
         return object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 event?.let { eventData ->
-                    executorService.submit { onData(eventData) }
+                    onData(eventData)
                 }
             }
 
@@ -45,11 +47,11 @@ class MovementDataGatherer(
     fun stop() = unregisterAllListeners()
 
     private fun registerListeners() {
-        sensorTypes.forEachIndexed { index, type ->
+        sensorTypes.forEach { type ->
             val sensor = sensorManager.getDefaultSensor(type)
             sensor?.let {
                 sensorManager.registerListener(
-                    sensorEventListeners[index],
+                    sensorEventListener,
                     sensor,
                     SensorManager.SENSOR_DELAY_NORMAL
                 )
@@ -58,21 +60,24 @@ class MovementDataGatherer(
     }
 
     fun unregisterSensor(sensorType: Int) {
-        val index = sensorTypes.indexOf(sensorType)
-        if (index != -1) {
-            val sensor = sensorManager.getDefaultSensor(sensorType)
-            sensor?.let {
-                sensorManager.unregisterListener(sensorEventListeners[index], sensor)
-            }
+        val sensor = sensorManager.getDefaultSensor(sensorType)
+        sensor?.let {
+            sensorManager.unregisterListener(sensorEventListener, sensor)
         }
     }
 
     private fun unregisterAllListeners() {
-        sensorTypes.forEachIndexed { index, type ->
+        sensorTypes.forEach { type ->
             val sensor = sensorManager.getDefaultSensor(type)
             sensor?.let {
-                sensorManager.unregisterListener(sensorEventListeners[index], sensor)
+                sensorManager.unregisterListener(sensorEventListener, sensor)
             }
+        }
+    }
+
+    fun closeDedicatedThreads() {
+        dedicatedThreads.values.forEach { coroutineContext ->
+            coroutineContext.cancel()
         }
     }
 }
