@@ -3,10 +3,10 @@ package com.example.controllers
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.ContentValues
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Base64
 import androidx.camera.core.ImageProxy
 import com.example.data_gatherers.CameraDataGatherer
 import com.example.pseudorandomgenerator.databinding.ActivityCameraBinding
@@ -18,7 +18,7 @@ import java.nio.ByteBuffer
 import kotlin.reflect.KSuspendFunction0
 
 class CameraActivityController(
-    private val dataHolder: DataHolder<Map<String, String>>,
+    private val dataHolder: DataHolder<ByteArray>,
     private val sources: List<String>,
     private val activity: Activity,
     private val binding: ActivityCameraBinding,
@@ -38,16 +38,14 @@ class CameraActivityController(
     }
 
     private fun onImageData(imageData: ImageProxy) {
-        val eventData = mapOf(
-            "yData" to Base64.encodeToString(imageData.planes[0].buffer.toByteArray(), Base64.DEFAULT),
-            "uData" to Base64.encodeToString(imageData.planes[1].buffer.toByteArray(), Base64.DEFAULT),
-            "vData" to Base64.encodeToString(imageData.planes[2].buffer.toByteArray(), Base64.DEFAULT)
-        )
+        val bitmap = imageData.toBitmap()
 
-        dataHolder.addElementToList(camera, eventData)
+        val result = getBits(bitmap)
+
+        dataHolder.addElementToList(camera, result)
 
         if (dataHolder.getListSize(camera) == Constants.DESIRED_LENGTH_CAMERA) {
-            writeEventsToFile(dataHolder.getListByName(camera))
+            saveData(dataHolder.getListByName(camera))
             dataHolder.clearAllLists()
             activity.runOnUiThread { runBlocking {  resetUi() } }
         }
@@ -55,44 +53,12 @@ class CameraActivityController(
         activity.runOnUiThread { runBlocking {  updateUi() } }
     }
 
-    private fun writeEventsToFile(events: List<Map<String, String>>) {
-        val resolver: ContentResolver = activity.contentResolver
-
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "events_${System.currentTimeMillis()}.json")
-            put(MediaStore.MediaColumns.MIME_TYPE, "application/json")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOCUMENTS}/Thesis/Camera")
-                put(MediaStore.MediaColumns.IS_PENDING, 1)
-            }
-        }
-
-        val uri = resolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
-
-        try {
-            uri?.let {
-                resolver.openOutputStream(it)?.use { outputStream ->
-                    val jsonEvents = events.joinToString(prefix = "[", postfix = "]", separator = ",") { eventData ->
-                        """{"yData": "${eventData["yData"]}", "uData": "${eventData["uData"]}", "vData": "${eventData["vData"]}"}"""
-                    }
-                    outputStream.write(jsonEvents.toByteArray())
-                }
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } finally {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                contentValues.clear()
-                contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
-                uri?.let { resolver.update(it, contentValues, null, null) }
-            }
-        }
+    private fun getBits(bitmap: Bitmap): ByteArray {
+        return ByteArray(0)
     }
-}
 
-private fun ByteBuffer.toByteArray(): ByteArray {
-    val bytes = ByteArray(remaining())
-    get(bytes)
-    return bytes
 
+    private fun saveData(events: List<ByteArray>) {
+
+    }
 }

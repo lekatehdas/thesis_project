@@ -16,7 +16,7 @@ class CameraActivity : AppCompatActivity() {
         camera
     )
 
-    private lateinit var dataHolder: DataHolder<Map<String, String>>
+    private lateinit var dataHolder: DataHolder<ByteArray>
     private lateinit var collector: CameraActivityController
 
 
