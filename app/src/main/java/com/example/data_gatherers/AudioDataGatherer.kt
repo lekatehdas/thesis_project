@@ -43,7 +43,7 @@ class AudioDataGatherer(
 
             audioRecorder?.startRecording()
 
-            val chunkSize = 8 // number of bytes in each chunk
+            val chunkSize = 2 // number of bytes in each chunk
             val buffer = ByteArray(chunkSize)
             var bufferIndex = 0
 

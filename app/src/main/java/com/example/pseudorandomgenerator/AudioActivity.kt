@@ -60,7 +60,7 @@ class AudioActivity : AppCompatActivity() {
         binding.progressBarAudio.progress = 0
         binding.txtAudioPercent.text = "0%"
         binding.btnAudioStart.text = "START"
-        binding.btnAudioStart.isChecked = false //TODO commented out for infinite loop.
+//        binding.btnAudioStart.isChecked = false //TODO commented out for infinite loop.
     }
 
     @SuppressLint("SetTextI18n")
